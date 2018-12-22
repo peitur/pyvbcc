@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+import os, sys, re
+import getopt
+from pprint import pprint
+
+SUPPORTED_MODES= {
+    "help" : {"description": "This help"},
+    "create" : {"description": ""},
+    "start" : {"description": ""},
+    "stop" : {"description": ""},
+    "destroy" : {"description": ""}
+    }
+
+def print_help( script, mode=None ):
+    sps = re.split("\/", script )
+    print("# Help %s " % ( sps[-1] ) )
+
+    if not mode:
+        for m in SUPPORTED_MODES:
+            print("\t%s \t %s" % ( m, SUPPORTED_MODES[m]["description"] ) )
+
+
+
+if __name__ == "__main__":
+    opt = dict()
+    opt['mode'] = "help"
+    opt['debug'] = False
+
+    if len( sys.argv ) < 2:
+        print_help( sys.argv[0] )
+        sys.exit(1)
+
+    if sys.argv[1] in SUPPORTED_MODES:
+        opt['mode'] = sys.argv[1]
+    else:
+        print_help( sys.argv[0] )
+        #raise RuntimeError("Unsupported mode %s" % ( sys.argv[1] ) )
+        sys.exit(3)
+        
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hd", ["help", "debug"])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        print_help( sys.argv[0] )
+        sys.exit(2)
+
+    for o, a in opts:
+        if a in ("-h", "--help"):
+            opt['help'] = True
+        elif o in ("-d", "--debug"):
+            opt['debug'] = True
+        else:
+            assert False, "unhandled option"
+
+
+    pprint( opt )
