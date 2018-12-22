@@ -1,3 +1,4 @@
+!lib/pyvbcc/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -14,8 +15,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+lib/python*
+lib64/python*
 parts/
 sdist/
 var/
@@ -24,6 +25,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+include
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -102,3 +104,19 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# exclude virtualenv stuff
+bin/activate
+bin/activate.csh
+bin/activate.fish
+bin/activate_this.py
+bin/easy_install
+bin/easy_install-3.7
+bin/pip
+bin/pip3
+bin/pip3.7
+bin/python
+bin/python-config
+bin/python3
+bin/python3.7
+bin/wheel
