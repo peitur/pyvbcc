@@ -8,6 +8,7 @@ from pathlib import Path
 from pprint import pprint
 
 import pyvbcc.config
+import pyvbcc.cli
 
 ##########################################################
 ## Defaults
@@ -22,8 +23,13 @@ SUPPORTED_MODES= {
     "create" : {"description": "Create VM group"},
     "start" : {"description": "Start VM group"},
     "stop" : {"description": "Stop VM group"},
-    "destroy" : {"description": "Destroy VM group"}
-    }
+    "destroy" : {"description": "Destroy VM group"},
+    "insert": {"description":"Insert media into VM"},
+    "eject": {"description":"Eject media from VM"}
+
+}
+
+
 
 def print_help( script, mode=None ):
     sps = re.split("\/", script )
@@ -79,7 +85,7 @@ if __name__ == "__main__":
         sys.exit(3)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hdc:", ["help", "debug", "config"])
+        opts, args = getopt.getopt(sys.argv[1:], "hdc:g:", ["help", "debug", "config=","group="])
     except getopt.GetoptError as err:
         # print help information and exit:
         print_help( sys.argv[0] )
@@ -92,8 +98,8 @@ if __name__ == "__main__":
             opt['system.debug'] = True
         elif o in ("-c", "--config"):
             opt['config.file'] = a
-        else:
-            assert False, "unhandled option"
+        elif o in ("-g", "--group"):
+            opt['group.name'] = a
 
 
     try:
