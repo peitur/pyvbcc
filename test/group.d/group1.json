@@ -1,0 +1,8 @@
+{
+  "name":"group1",
+  "networks":[],
+  "vms":[
+    {"name":"vm1","nics":[], "cpus":"1","ccap":"75","memory":"1024","disks":[],"iso":""},
+  ],
+  "include":[]
+}

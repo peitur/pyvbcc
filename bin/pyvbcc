@@ -22,6 +22,8 @@ SUPPORTED_MODES= {
     "help" : {"description": "This help"},
     "create" : {"description": "Create VM group"},
     "start" : {"description": "Start VM group"},
+    "ssh" : {"description": "SSH VM"},
+    "provision" : {"description": "Manually Provision VM or VM Grouyp"},
     "stop" : {"description": "Stop VM group"},
     "destroy" : {"description": "Destroy VM group"},
     "insert": {"description":"Insert media into VM"},

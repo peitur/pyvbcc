@@ -33,6 +33,14 @@ class DestroyCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
         pass
 
+class SshCommandLine( CommonCommandLine ):
+    def __init__(self, argv, **opt ):
+        pass
+
+class ProvisionCommandLine( CommonCommandLine ):
+    def __init__(self, argv, **opt ):
+        pass
+
 class InsertCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
         pass
