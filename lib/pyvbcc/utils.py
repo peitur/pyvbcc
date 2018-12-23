@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os, sys, re
+import json
 import hashlib
 import requests
 from pprint import pprint
@@ -109,6 +110,12 @@ def write_file( filename, data ):
         return _write_json( filename, data )
     else:
         return _write_text( filename, data )
+
+def file_is_json( filename ):
+    filesplit = re.split( r"\.", filename )
+    if filesplit[-1] in ( "json" ):
+        return True
+    return False
 
 ################################################################################
 
