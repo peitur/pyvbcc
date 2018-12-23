@@ -2,14 +2,27 @@
 
 import os, sys, re
 import getopt
+import traceback
+
+from pathlib import Path
 from pprint import pprint
 
+import pyvbcc.config
+
+##########################################################
+## Defaults
+##########################################################
+CONFIG_FILE="etc/pyvbcc.json"
+
+##########################################################
+## Menu
+##########################################################
 SUPPORTED_MODES= {
     "help" : {"description": "This help"},
-    "create" : {"description": ""},
-    "start" : {"description": ""},
-    "stop" : {"description": ""},
-    "destroy" : {"description": ""}
+    "create" : {"description": "Create VM group"},
+    "start" : {"description": "Start VM group"},
+    "stop" : {"description": "Stop VM group"},
+    "destroy" : {"description": "Destroy VM group"}
     }
 
 def print_help( script, mode=None ):
@@ -22,24 +35,51 @@ def print_help( script, mode=None ):
 
 
 
+def print_exception( e ):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    print("*** print_tb:")
+    traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+    print("*** print_exception:")
+    # exc_type below is ignored on 3.5 and later
+    traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                limit=2, file=sys.stdout)
+    print("*** print_exc:")
+    traceback.print_exc(limit=2, file=sys.stdout)
+    print("*** format_exc, first and last line:")
+    formatted_lines = traceback.format_exc().splitlines()
+    print(formatted_lines[0])
+    print(formatted_lines[-1])
+    print("*** format_exception:")
+    # exc_type below is ignored on 3.5 and later
+    print(repr(traceback.format_exception(exc_type, exc_value,
+                                            exc_traceback)))
+    print("*** extract_tb:")
+    print(repr(traceback.extract_tb(exc_traceback)))
+    print("*** format_tb:")
+    print(repr(traceback.format_tb(exc_traceback)))
+    print("*** tb_lineno:", exc_traceback.tb_lineno)
+
+
 if __name__ == "__main__":
     opt = dict()
-    opt['mode'] = "help"
-    opt['debug'] = False
+    opt['system.mode'] = "help"
+    opt['system.debug'] = False
+    opt['config.file'] = CONFIG_FILE
 
+    
     if len( sys.argv ) < 2:
         print_help( sys.argv[0] )
         sys.exit(1)
 
     if sys.argv[1] in SUPPORTED_MODES:
-        opt['mode'] = sys.argv[1]
+        opt['system.mode'] = sys.argv[1]
     else:
         print_help( sys.argv[0] )
         #raise RuntimeError("Unsupported mode %s" % ( sys.argv[1] ) )
         sys.exit(3)
-        
+
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hd", ["help", "debug"])
+        opts, args = getopt.getopt(sys.argv[1:], "hdc:", ["help", "debug", "config"])
     except getopt.GetoptError as err:
         # print help information and exit:
         print_help( sys.argv[0] )
@@ -47,11 +87,14 @@ if __name__ == "__main__":
 
     for o, a in opts:
         if a in ("-h", "--help"):
-            opt['help'] = True
+            opt['system.help'] = True
         elif o in ("-d", "--debug"):
-            opt['debug'] = True
+            opt['system.debug'] = True
+        elif o in ("-c", "--config"):
+            opt['config.file'] = a
         else:
             assert False, "unhandled option"
 
-
     pprint( opt )
+
+    opt['system.config'] = pyvbcc.config.Configuration( opt['config.file'], **opt )

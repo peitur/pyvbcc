@@ -1,0 +1,11 @@
+{
+	"system":{
+		"debug":"true"
+	},
+	"vbm":{
+		"path":"/usr/local/bin/VBoxManage"
+	},
+	"config":{
+		"path":"test/groups.d"
+	}
+}
