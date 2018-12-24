@@ -7,6 +7,7 @@ import traceback
 from pathlib import Path
 from pprint import pprint
 
+import pyvbcc
 import pyvbcc.config
 import pyvbcc.cli
 
@@ -70,9 +71,6 @@ def print_exception( e ):
 
 if __name__ == "__main__":
     opt = dict()
-    opt['system.mode'] = "help"
-    opt['system.debug'] = False
-    opt['config.file'] = CONFIG_FILE
 
 
     if len( sys.argv ) < 2:
@@ -80,19 +78,21 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if sys.argv[1] in SUPPORTED_MODES:
-        opt['system.mode'] = sys.argv[1]
+        opt[ pyvbcc.KEY_SYSTEM_MODE ] = sys.argv[1]
     else:
         print_help( sys.argv[0] )
         #raise RuntimeError("Unsupported mode %s" % ( sys.argv[1] ) )
         sys.exit(3)
 
     print("-----------------------------------------------------------")
-    pprint( pyvbcc.cli.CommandLine( opt['system.mode'], sys.argv[1:], **opt ).parse() )
+    opt = pyvbcc.cli.CommandLine( opt[ pyvbcc.KEY_SYSTEM_MODE ], sys.argv[1:], **opt ).parse()
+    pprint( opt )
     print("-----------------------------------------------------------")
 
     try:
-        opt['system.config'] = pyvbcc.config.Configuration( opt['config.file'], **opt )
-        opt['system.config'].pprint_raw()
+        if pyvbcc.KEY_SYSTEM_CONFIG in opt:
+            opt[ pyvbcc.KEY_SYSTEM_CONFIG ] = pyvbcc.config.Configuration( opt[ pyvbcc.KEY_SYSTEM_CONFIG ], **opt )
+            opt[ pyvbcc.KEY_SYSTEM_CONFIG ].pprint_raw()
     except Exception as e:
         print_exception( e )
         sys.exit(1)

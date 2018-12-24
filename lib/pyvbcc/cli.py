@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 
 import os, sys, re
 import json
@@ -6,6 +6,7 @@ import getopt
 
 from pprint import pprint
 
+import pyvbcc
 import pyvbcc.config
 
 
@@ -13,8 +14,8 @@ class CommonCommandLine( object ):
     def __init__( self, argv, shrt=[], lng=[], **opt ):
         self._debug = False
         self._argv = argv
-        self._short = ["hD"]+shrt
-        self._long = ["help","debug"]+lng
+        self._short = ["hDc:"]+shrt
+        self._long = ["help","debug", "config="]+lng
         self._opt = dict()
         self._opts = None
         self._args = None
@@ -37,19 +38,22 @@ class HelpCommandLine( CommonCommandLine ):
 
 class InfoCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
-        super().__init__( argv, ["v:n:d:"], ["vm=","network=","dhcp="], **opt )
+        super().__init__( argv, ["v:n:d:g:"], ["vm=","network=","dhcp=","group="], **opt )
 
     def parse( self ):
-
         for o, a in self._opts:
             if a in ("-h", "--help"):
-                self._opt['system.help'] = True
+                self._opt[ pyvbcc.KEY_SYSTEM_HELP ] = True
             elif o in ("-d", "--debug"):
-                self._opt['system.debug'] = True
-            elif o in ("-c", "--config"):
-                self._opt['config.file'] = a
+                self._opt[ pyvbcc.KEY_SYSTEM_DEBUG ] = True
+            elif o in ("-v", "--vm"):
+                self._opt[ pyvbcc.KEY_VM_NAME ] = a
+            elif o in ("-n", "--network"):
+                self._opt[ pyvbcc.KEY_NETWORK_NAME ] = a
+            elif o in ("-d", "--dhcp"):
+                self._opt[ pyvbcc.KEY_DHCP_NAME ] = a
             elif o in ("-g", "--group"):
-                self._opt['group.name'] = a
+                self._opt[ pyvbcc.KEY_GROUP_NAME ] = a
         return self._opt
 
 class CreateCommandLine( CommonCommandLine ):
