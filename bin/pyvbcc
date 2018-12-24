@@ -20,6 +20,7 @@ CONFIG_FILE="etc/pyvbcc.json"
 ##########################################################
 SUPPORTED_MODES= {
     "help" : {"description": "This help"},
+    "info" : {"description": "Info of environment"},
     "create" : {"description": "Create VM group"},
     "start" : {"description": "Start VM group"},
     "ssh" : {"description": "SSH VM"},
@@ -28,7 +29,6 @@ SUPPORTED_MODES= {
     "destroy" : {"description": "Destroy VM group"},
     "insert": {"description":"Insert media into VM"},
     "eject": {"description":"Eject media from VM"}
-
 }
 
 
@@ -86,23 +86,9 @@ if __name__ == "__main__":
         #raise RuntimeError("Unsupported mode %s" % ( sys.argv[1] ) )
         sys.exit(3)
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hdc:g:", ["help", "debug", "config=","group="])
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print_help( sys.argv[0] )
-        sys.exit(2)
-
-    for o, a in opts:
-        if a in ("-h", "--help"):
-            opt['system.help'] = True
-        elif o in ("-d", "--debug"):
-            opt['system.debug'] = True
-        elif o in ("-c", "--config"):
-            opt['config.file'] = a
-        elif o in ("-g", "--group"):
-            opt['group.name'] = a
-
+    print("-----------------------------------------------------------")
+    pprint( pyvbcc.cli.CommandLine( opt['system.mode'], sys.argv[1:], **opt ).parse() )
+    print("-----------------------------------------------------------")
 
     try:
         opt['system.config'] = pyvbcc.config.Configuration( opt['config.file'], **opt )
