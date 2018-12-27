@@ -100,6 +100,9 @@ class EjectCommandLine( CommonCommandLine ):
 def CommandLine( mode, argv, **opt ):
     if mode == "help": return HelpCommandLine( argv, **opt )
     elif mode == "info" : return InfoCommandLine( argv, **opt )
+    elif mode == "vmlist" : return InfoCommandLine( argv, **opt )
+    elif mode == "netlist" : return InfoCommandLine( argv, **opt )
+    elif mode == "dhcplist" : return InfoCommandLine( argv, **opt )
     elif mode == "create" : return CreateCommandLine( argv, **opt )
     elif mode == "start" : return StartCommandLine( argv, **opt )
     elif mode == "stop" : return StopCommandLine( argv, **opt )
