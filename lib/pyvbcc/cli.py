@@ -8,7 +8,7 @@ from pprint import pprint
 
 import pyvbcc
 import pyvbcc.config
-
+import pyvbcc.validate
 
 class CommonCommandLine( object ):
     def __init__( self, argv, shrt=[], lng=[], **opt ):
@@ -19,6 +19,7 @@ class CommonCommandLine( object ):
         self._opt = dict()
         self._opts = None
         self._args = None
+        self._validator = None
 
         if 'debug' in opt and opt['debug'] in (True, False):
             self._debug = opt['debug']
@@ -40,6 +41,15 @@ class InfoCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, ["v:n:d:g:"], ["vm=","network=","dhcp=","group="], **opt )
 
+        self._validmap = {
+            pyvbcc.KEY_VM_NAME :{ "match":["^[a-zA-Z0-9\-\.]+$"] },
+            pyvbcc.KEY_NETWORK_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
+            pyvbcc.KEY_DHCP_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
+            pyvbcc.KEY_GROUP_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] }
+        }
+
+        self._validator = pyvbcc.validate.Validator( self._validmap, **opt )
+
     def parse( self ):
         for o, a in self._opts:
             if a in ("-h", "--help"):
@@ -54,7 +64,16 @@ class InfoCommandLine( CommonCommandLine ):
                 self._opt[ pyvbcc.KEY_DHCP_NAME ] = a
             elif o in ("-g", "--group"):
                 self._opt[ pyvbcc.KEY_GROUP_NAME ] = a
+
+        ## Either this is true, or get exception
+        self._validator.validate( self._opt )
+
         return self._opt
+
+    def get( self, key ):
+        if key in self._opt:
+            return self._opt[ key ]
+        return None
 
 class CreateCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
