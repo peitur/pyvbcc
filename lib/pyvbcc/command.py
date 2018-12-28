@@ -138,12 +138,12 @@ class ListGroupCommand( GenericCommand ):
             linex = re.compile( r"\/" ).sub(  "", line )
             if len( linex ) == 0:
                 linex = "default"
-            data[linex] = line
+            data[linex] = { "name": linex, "path": line }
 
         if self._group == "all":
             return data
 
-        return { x: data[x] for x in data if x == self._group } 
+        return [ data[x] for x in data if x == self._group ]
 
 
 if __name__ == "__main__":
