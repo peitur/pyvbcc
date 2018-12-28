@@ -94,6 +94,9 @@ class InfoCommandLine( CommonCommandLine ):
         elif pyvbcc.KEY_DISKS_VM_NAME in self._opt:
             res = pyvbcc.command.ListDiskCommand( self._opt[ pyvbcc.KEY_DISKS_VM_NAME ] ).run()
             pprint( res )
+        elif pyvbcc.KEY_GROUP_NAME in self._opt:
+            res = pyvbcc.command.ListGroupCommand( self._opt[ pyvbcc.KEY_GROUP_NAME ] ).run()
+            pprint( res )
 
 
 class CreateCommandLine( CommonCommandLine ):

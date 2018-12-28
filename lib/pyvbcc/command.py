@@ -62,7 +62,6 @@ class ListNetworkCommand( GenericCommand ):
     def run( self ):
         data = dict()
         res = super().run()
-
         item = dict()
         for line in res:
             line = re.compile( "\"" ).sub(  "", line )
@@ -79,7 +78,6 @@ class ListNetworkCommand( GenericCommand ):
                 if re.match( "name", key ) and len( item ) > 0:
                     data[ item[ 'name' ] ] = item
                     item = dict()
-
                 item[ key ] = val
 
             if len( line ) == 0 and len( item ) > 0:
@@ -99,7 +97,6 @@ class ListDiskCommand( GenericCommand ):
     def run( self ):
         data = dict()
         res = super().run()
-
         item = dict()
         for line in res:
             line = re.compile( "\"" ).sub(  "", line )
@@ -117,7 +114,6 @@ class ListDiskCommand( GenericCommand ):
                 if re.match( "uuid", key ) and len( item ) > 0:
                     data[ item[ 'uuid' ] ] = item
                     item = dict()
-
                 item[ key ] = val
 
             if len( line ) == 0 and len( item ) > 0:
@@ -127,6 +123,28 @@ class ListDiskCommand( GenericCommand ):
             return data
 
         return [ data[i] for i in data if data[i]['inusebyvms']['name'] == self._vm ]
+
+class ListGroupCommand( GenericCommand ):
+    def __init__( self, group, **opt ):
+        super().__init__( ["VBoxManage", "list", "groups", "--long" ], **opt )
+        self._group = group
+
+    def run( self ):
+        data = dict()
+        res = super().run()
+
+        for line in res:
+            line = re.compile( r"\"" ).sub(  "", line )
+            linex = re.compile( r"\/" ).sub(  "", line )
+            if len( linex ) == 0:
+                linex = "default"
+            data[linex] = line
+
+        if self._group == "all":
+            return data
+
+        return { x: data[x] for x in data if x == self._group } 
+
 
 if __name__ == "__main__":
     pass
