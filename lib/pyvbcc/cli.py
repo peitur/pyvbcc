@@ -49,11 +49,11 @@ class InfoCommandLine( CommonCommandLine ):
         super().__init__( argv, ["v:","n:","d:","g:"], ["vm=","network=","dhcp=","group=","vm-disk="], **opt )
 
         self._validmap = {
-            pyvbcc.KEY_VM_NAME :{ "match":["^[a-zA-Z0-9\-\.]+$"] },
-            pyvbcc.KEY_NETWORK_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
-            pyvbcc.KEY_DHCP_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
-            pyvbcc.KEY_DISKS_VM_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
-            pyvbcc.KEY_GROUP_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] }
+            pyvbcc.KEY_VM_NAME :{ "match":["^[a-zA-Z0-9\-\._]+$"] },
+            pyvbcc.KEY_NETWORK_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
+            pyvbcc.KEY_DHCP_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
+            pyvbcc.KEY_DISKS_VM_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
+            pyvbcc.KEY_GROUP_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] }
         }
 
         self._validator = pyvbcc.validate.Validator( self._validmap, **opt )

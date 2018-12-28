@@ -112,7 +112,7 @@ class ListDiskCommand( GenericCommand ):
                 if key == "inusebyvms":
                     linex = re.sub( r"\s+", "", line )
                     m = re.compile("\S+:(\S+)\(UUID:(\S+)\)").match( linex )
-                    val = {"vm": m.group(1), "uuid":m.group(2)}
+                    val = {"name": m.group(1), "uuid":m.group(2)}
 
                 if re.match( "uuid", key ) and len( item ) > 0:
                     data[ item[ 'uuid' ] ] = item
@@ -123,10 +123,10 @@ class ListDiskCommand( GenericCommand ):
             if len( line ) == 0 and len( item ) > 0:
                 data[ item['uuid'] ] = item
 
-        if self._vm == "all": return data
-        elif self._vm in data: return data[ self._vm ]
+        if self._vm == "all":
+            return data
 
-        return []
+        return [ data[i] for i in data if data[i]['inusebyvms']['name'] == self._vm ]
 
 if __name__ == "__main__":
     pass
