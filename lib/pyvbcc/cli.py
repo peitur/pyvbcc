@@ -46,12 +46,13 @@ class HelpCommandLine( CommonCommandLine ):
 
 class InfoCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
-        super().__init__( argv, ["v:","n:","d:","g:"], ["vm=","network=","dhcp=","group="], **opt )
+        super().__init__( argv, ["v:","n:","d:","g:"], ["vm=","network=","dhcp=","group=","vm-disk="], **opt )
 
         self._validmap = {
             pyvbcc.KEY_VM_NAME :{ "match":["^[a-zA-Z0-9\-\.]+$"] },
             pyvbcc.KEY_NETWORK_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
             pyvbcc.KEY_DHCP_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
+            pyvbcc.KEY_DISKS_VM_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] },
             pyvbcc.KEY_GROUP_NAME : { "match":["^[a-zA-Z0-9\-\.]+$"] }
         }
 
@@ -72,6 +73,8 @@ class InfoCommandLine( CommonCommandLine ):
                 self._opt[ pyvbcc.KEY_DHCP_NAME ] = a
             elif o in ("-g", "--group"):
                 self._opt[ pyvbcc.KEY_GROUP_NAME ] = a
+            elif o in ("--vm-disk"):
+                self._opt[ pyvbcc.KEY_DISKS_VM_NAME ] = a
 
         ## Either this is true, or get exception
         self._validator.validate( self._opt )
@@ -88,6 +91,9 @@ class InfoCommandLine( CommonCommandLine ):
             for t in ["intnets", "bridgedifs", "hostonlyifs", "natnets"]:
                 allnets[ t ] = pyvbcc.command.ListNetworkCommand( t, self._opt[ pyvbcc.KEY_NETWORK_NAME ] ).run()
             pprint( allnets )
+        elif pyvbcc.KEY_DISKS_VM_NAME in self._opt:
+            res = pyvbcc.command.ListDiskCommand( self._opt[ pyvbcc.KEY_DISKS_VM_NAME ] ).run()
+            pprint( res )
 
 
 class CreateCommandLine( CommonCommandLine ):

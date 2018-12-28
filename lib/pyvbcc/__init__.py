@@ -15,6 +15,9 @@ KEY_GROUP_NAME="group.name"
 ##
 KEY_VM_NAME="vm.name"
 
+
+KEY_DISKS_VM_NAME="disk.name"
+
 ##
 KEY_NETWORK_NAME="network.name"
 
