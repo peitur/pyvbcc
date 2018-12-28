@@ -29,7 +29,15 @@ class CommonCommandLine( object ):
         except getopt.GetoptError as err:
             raise err
 
+    def get( self, key ):
+        if key in self._opt:
+            return self._opt[ key ]
+        return None
+
     def parse(self):
+        pass
+
+    def action( self ):
         pass
 
 class HelpCommandLine( CommonCommandLine ):
@@ -70,10 +78,6 @@ class InfoCommandLine( CommonCommandLine ):
 
         return self._opt
 
-    def get( self, key ):
-        if key in self._opt:
-            return self._opt[ key ]
-        return None
 
 class CreateCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
