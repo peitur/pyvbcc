@@ -9,6 +9,7 @@ from pprint import pprint
 import pyvbcc
 import pyvbcc.config
 import pyvbcc.validate
+import pyvbcc.command
 
 class CommonCommandLine( object ):
     def __init__( self, argv, shrt=[], lng=[], **opt ):
@@ -25,7 +26,7 @@ class CommonCommandLine( object ):
             self._debug = opt['debug']
 
         try:
-            self._opts, self._args = getopt.getopt( self._argv, "".join( self._short ), self._long )
+            self._opts, self._args = getopt.getopt( self._argv[1:], "".join( self._short ), self._long )
         except getopt.GetoptError as err:
             raise err
 
@@ -34,11 +35,9 @@ class CommonCommandLine( object ):
             return self._opt[ key ]
         return None
 
-    def parse(self):
-        pass
+    def parse(self): pass
 
-    def action( self ):
-        pass
+    def action( self ): pass
 
 class HelpCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
@@ -47,7 +46,7 @@ class HelpCommandLine( CommonCommandLine ):
 
 class InfoCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
-        super().__init__( argv, ["v:n:d:g:"], ["vm=","network=","dhcp=","group="], **opt )
+        super().__init__( argv, ["v:","n:","d:","g:"], ["vm=","network=","dhcp=","group="], **opt )
 
         self._validmap = {
             pyvbcc.KEY_VM_NAME :{ "match":["^[a-zA-Z0-9\-\.]+$"] },
@@ -57,6 +56,7 @@ class InfoCommandLine( CommonCommandLine ):
         }
 
         self._validator = pyvbcc.validate.Validator( self._validmap, **opt )
+
 
     def parse( self ):
         for o, a in self._opts:
@@ -77,6 +77,17 @@ class InfoCommandLine( CommonCommandLine ):
         self._validator.validate( self._opt )
 
         return self._opt
+
+
+    def action( self ):
+        if pyvbcc.KEY_VM_NAME in self._opt:
+            res = pyvbcc.command.InfoVmCommand( self._opt[ pyvbcc.KEY_VM_NAME ] ).run()
+            pprint( res )
+        elif pyvbcc.KEY_NETWORK_NAME in self._opt:
+            allnets = dict()
+            for t in ["intnets", "bridgedifs", "hostonlyifs", "natnets"]:
+                allnets[ t ] = pyvbcc.command.ListNetworkCommand( t, self._opt[ pyvbcc.KEY_NETWORK_NAME ] ).run()
+            pprint( allnets )
 
 
 class CreateCommandLine( CommonCommandLine ):
@@ -123,9 +134,6 @@ class EjectCommandLine( CommonCommandLine ):
 def CommandLine( mode, argv, **opt ):
     if mode == "help": return HelpCommandLine( argv, **opt )
     elif mode == "info" : return InfoCommandLine( argv, **opt )
-    elif mode == "vmlist" : return InfoCommandLine( argv, **opt )
-    elif mode == "netlist" : return InfoCommandLine( argv, **opt )
-    elif mode == "dhcplist" : return InfoCommandLine( argv, **opt )
     elif mode == "create" : return CreateCommandLine( argv, **opt )
     elif mode == "start" : return StartCommandLine( argv, **opt )
     elif mode == "stop" : return StopCommandLine( argv, **opt )

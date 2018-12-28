@@ -85,8 +85,12 @@ if __name__ == "__main__":
         sys.exit(3)
 
     print("-----------------------------------------------------------")
-    opt = pyvbcc.cli.CommandLine( opt[ pyvbcc.KEY_SYSTEM_MODE ], sys.argv[1:], **opt ).parse()
-    pprint( opt )
+    try:
+        cli = pyvbcc.cli.CommandLine( opt[ pyvbcc.KEY_SYSTEM_MODE ], sys.argv[1:], **opt )
+        opt = cli.parse()
+        cli.action()
+    except Exception as e:
+        print_exception( e )
     print("-----------------------------------------------------------")
 
     try:
