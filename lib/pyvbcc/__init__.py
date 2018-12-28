@@ -14,6 +14,17 @@ KEY_GROUP_NAME="group.name"
 
 ##
 KEY_VM_NAME="vm.name"
+KEY_VM_OSTYPE="vm.ostyoe"
+KEY_VM_CPUS="vm.cpus"
+KEY_VM_MEMORY="vm.mem"
+KEY_VM_CPUCAP="vm.ccap"
+
+
+KEY_CONTROLLER_NAME="contoller.name"
+KEY_CONTROLLER_TYPE="controller.type"
+KEY_CONTROLLER_CHIPSET="controller.chipset"
+KEY_CONTROLLER_BOOTABLE="controller.bootable"
+KEY_CONTROLLER_PCOUNT="controller.pcount"
 
 
 KEY_DISKS_VM_NAME="disk.name"

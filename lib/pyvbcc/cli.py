@@ -101,8 +101,26 @@ class InfoCommandLine( CommonCommandLine ):
 
 class CreateCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
-        super().__init__( argv, [], [], **opt )
+        super().__init__( argv, ["g:"], ["group="], **opt )
+        self._validmap = {
+            pyvbcc.KEY_GROUP_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] }
+        }
 
+        self._validator = pyvbcc.validate.Validator( self._validmap, **opt )
+
+    def parse( self ):
+        for o, a in self._opts:
+            if a in ("-h", "--help"):
+                self._opt[ pyvbcc.KEY_SYSTEM_HELP ] = True
+            elif o in ("-d", "--debug"):
+                self._opt[ pyvbcc.KEY_SYSTEM_DEBUG ] = True
+            elif o in ("-g", "--group"):
+                self._opt[ pyvbcc.KEY_GROUP_NAME ] = a
+
+        ## Either this is true, or get exception
+        self._validator.validate( self._opt )
+
+        return self._opt
 
 class StartCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):

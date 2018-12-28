@@ -145,6 +145,60 @@ class ListGroupCommand( GenericCommand ):
 
         return [ data[x] for x in data if x == self._group ]
 
+class CreateControllerCommand( GenericCommand ):
+
+    def __init__( self, cfg = {}, **opt ):
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._type = cfg[ pyvbcc.KEY_CONTROLLER_TYPE ]
+        self._chipset = cfg[ pyvbcc.KEY_CONTROLLER_CHIPSET ]
+        self._name = cfg[  pyvbcc.KEY_CONTROLLER_NAME ]
+        self._pcount = "8"
+        self._bootable = "off"
+        self._iocache = "on"
+
+        if pyvbcc.KEY_CONTROLLER_PCOUNT in cfg:
+            self._pcount = cfg[ pyvbcc.KEY_CONTROLLER_PCOUNT ]
+
+        if pyvbcc.KEY_CONTROLLER_BOOTABLE in cfg:
+            self._bootable = cfg[ pyvbcc.KEY_CONTROLLER_BOOTABLE ]
+
+        super().__init__( ["VBoxManage", "storagectl", self._vm, "--add", self._type, "--controller", self._chipset, "--name", self._name, "--portcount", self._pcount, "--bootable", self._bootable ], **opt )
+
+
+
+
+class CreateVmCommand( GenericCommand ):
+
+    def __init__( self, cfg = {}, **opt ):
+        self._group = "/%s" % (  cfg[ pyvbcc.KEY_GROUP_NAME ] )
+        self._ostype = cfg[  pyvbcc.KEY_VM_OSTYPE ]
+        self._name = cfg[ pyvbcc.KEY_VM_NAME ]
+
+        super().__init__( ["VBoxManage", "createvm", "--name", self._name, "--groups", self._group, "--ostype", self._ostype, "--register" ], **opt )
+
+
+class ModifyVmCommand( GenericCommand ):
+
+    def __init__( self, cfg = {}, **opt ):
+        super().__init__( ["VBoxManage", "modifyvm" ], **opt )
+        self._group = group
+
+
+class DeleteVmCommand( GenericCommand ):
+
+    def __init__( self, cfg = {}, **opt ):
+        super().__init__( ["VBoxManage", "modifyvm" ], **opt )
+        self._group = group
+
+    def run( self ):
+        pass
+
+
 
 if __name__ == "__main__":
+    vm1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64" }
+    ctl1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_CONTROLLER_TYPE: "sas", pyvbcc.KEY_CONTROLLER_CHIPSET: "LSILogicSAS", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
+
+    cli = CreateVmCommand( vm1 ).run()
+    cli = CreateControllerCommand( ctl1 ).run()
     pass
