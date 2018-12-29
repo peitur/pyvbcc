@@ -162,9 +162,39 @@ class CreateControllerCommand( GenericCommand ):
         if pyvbcc.KEY_CONTROLLER_BOOTABLE in cfg:
             self._bootable = cfg[ pyvbcc.KEY_CONTROLLER_BOOTABLE ]
 
-        super().__init__( ["VBoxManage", "storagectl", self._vm, "--add", self._type, "--controller", self._chipset, "--name", self._name, "--portcount", self._pcount, "--bootable", self._bootable ], **opt )
+        super().__init__( ["VBoxManage",
+            "storagectl", self._vm,
+            "--add", self._type,
+            "--controller", self._chipset,
+            "--name", self._name,
+            "--portcount", self._pcount,
+            "--bootable", self._bootable ],
+        **opt )
 
 
+class CreateDiskCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        self._size = cfg[ pyvbcc.KEY_DISK_NAME ]
+        self._filename = cfg[ pyvbcc.KEY_DISK_FILE ]
+
+        self._format = "VMDK"
+        if pyvbcc.KEY_DISK_FORMAT in cfg:
+            self._format = cfg[ pyvbcc.KEY_DISK_FORMAT ]
+
+        super().__init__( ["VBoxManage"
+            "createmedium", "disk",
+            "--filename", self._filename,
+            "--format", self._format
+        ], **opt )
+
+class AttachDiskCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._filename = cfg[ pyvbcc.KEY_DISK_FILE ]
+
+        super().__init__( ["VBoxManage"
+            "storageattach", self._vm
+        ], **opt )
 
 
 class CreateVmCommand( GenericCommand ):
@@ -174,7 +204,13 @@ class CreateVmCommand( GenericCommand ):
         self._ostype = cfg[  pyvbcc.KEY_VM_OSTYPE ]
         self._name = cfg[ pyvbcc.KEY_VM_NAME ]
 
-        super().__init__( ["VBoxManage", "createvm", "--name", self._name, "--groups", self._group, "--ostype", self._ostype, "--register" ], **opt )
+        super().__init__( ["VBoxManage",
+            "createvm",
+            "--name", self._name,
+            "--groups", self._group,
+            "--ostype", self._ostype,
+            "--register" ],
+        **opt )
 
 
 class ModifyVmCommand( GenericCommand ):
