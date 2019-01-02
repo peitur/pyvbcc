@@ -29,6 +29,12 @@ KEY_CONTROLLER_PCOUNT="controller.pcount"
 
 
 KEY_DISKS_VM_NAME="disk.name"
+KEY_DISKS_COMMENT="disk.comment"
+KEY_DISKS_PORT="disk.port"
+KEY_DISKS_PORT="disk.port"
+KEY_DISKS_DEVICE="disk.device"
+KEY_DISKS_MTYPE="disk.mtype"
+KEY_DISKS_PASSTHROUGH="disk.passthrough"
 
 ##
 KEY_NETWORK_NAME="network.name"

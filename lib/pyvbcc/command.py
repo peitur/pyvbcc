@@ -175,12 +175,12 @@ class CreateControllerCommand( GenericCommand ):
 
 class CreateDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
-        self._size = cfg[ pyvbcc.KEY_DISK_NAME ]
-        self._filename = cfg[ pyvbcc.KEY_DISK_FILE ]
+        self._size = cfg[ pyvbcc.KEY_DISKS_NAME ]
+        self._filename = cfg[ pyvbcc.KEY_DISKS_FILE ]
 
         self._format = "VMDK"
-        if pyvbcc.KEY_DISK_FORMAT in cfg:
-            self._format = cfg[ pyvbcc.KEY_DISK_FORMAT ]
+        if pyvbcc.KEY_DISKS_FORMAT in cfg:
+            self._format = cfg[ pyvbcc.KEY_DISKS_FORMAT ]
 
         super().__init__( ["VBoxManage"
             "createmedium", "disk",
@@ -192,14 +192,33 @@ class CreateDiskCommand( GenericCommand ):
 class AttachDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._controller = cfg[ pyvbcc.KEY_CONTROLLER_NAME ],
-        self._disk = cfg[ pyvbcc.KEY_DISK_FILE ],
+        self._controller = cfg[ pyvbcc.KEY_CONTROLLER_NAME ]
+        self._disk = cfg[ pyvbcc.KEY_DISKS_FILE ]
+        self._port = "8"
+        self._mtype = None
+        self._device = "0"
+        self._comment = None
+        self._passthrough = "on"
 
-        super().__init__( ["VBoxManage"
+        if pyvbcc.KEY_DISKS_PORT in cfg: self._port = cfg[ pyvbcc.KEY_DISKS_PORT ]
+        if pyvbcc.KEY_DISKS_MTYPE in cfg: self._mtype = cfg[ pyvbcc.KEY_DISKS_MTYPE ]
+        if pyvbcc.KEY_DISKS_DEVICE in cfg: self._device = cfg[ pyvbcc.KEY_DISKS_DEVICE ]
+        if pyvbcc.KEY_DISKS_COMMENT in cfg: self._comment = cfg[ pyvbcc.KEY_DISKS_COMMENT ]
+        if pyvbcc.KEY_DISKS_PASSTHROUGH in cfg: self._passthrough = cfg[ pyvbcc.KEY_DISKS_PASSTHROUGH ]
+
+        params = ["VBoxManage"
             "storageattach", self._vm,
             "--storagectl", self._controller,
             "--medium", self._disk
-        ], **opt )
+        ]
+
+        if self._port: params + list( [ "--port", self._port ] )
+        if self._device: params + list( [ "--device", self._device ] )
+        if self._mtype: params + list( [ "--mtype", self._mtype ] )
+        if self._comment: params + list( [ "--comment", self._comment ] )
+        if self._passthrough: params + list( [ "--passthrough", self._passthrough ] )
+
+        super().__init__( params, **opt )
 
 
 class CreateVmCommand( GenericCommand ):
