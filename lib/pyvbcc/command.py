@@ -224,7 +224,17 @@ class DeleteVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        super().__init__( ["VBoxManage", "unregistervm", self._vm, "--delete" ], **opt )
+        self._delete = True
+
+
+        if pyvbcc.KEY_VM_DELETE in cfg and cfg[ pyvbcc.KEY_VM_DELETE ] in (True, False):
+            self._delete = cfg[ pyvbcc.KEY_VM_DELETE ]
+
+        del_str = ""
+        if self._delete:
+            del_str = "--delete"
+
+        super().__init__( ["VBoxManage", "unregistervm", self._vm, del_str ], **opt )
 
 
 
