@@ -185,17 +185,20 @@ class CreateDiskCommand( GenericCommand ):
         super().__init__( ["VBoxManage"
             "createmedium", "disk",
             "--filename", self._filename,
-            "--format", self._format
+            "--format", self._format,
+            "--size", self._size
         ], **opt )
 
 class AttachDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._filename = cfg[ pyvbcc.KEY_DISK_FILE ]
-        self._iocache = True
+        self._controller = cfg[ pyvbcc.KEY_CONTROLLER_NAME ],
+        self._disk = cfg[ pyvbcc.KEY_DISK_FILE ],
 
         super().__init__( ["VBoxManage"
-            "storageattach", self._vm
+            "storageattach", self._vm,
+            "--storagectl", self._controller,
+            "--medium", self._disk
         ], **opt )
 
 
@@ -246,7 +249,7 @@ if __name__ == "__main__":
     vm1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64" }
     ctl0 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_CONTROLLER_TYPE: "ide", pyvbcc.KEY_CONTROLLER_PCOUNT: "2", pyvbcc.KEY_CONTROLLER_CHIPSET: "PIIX4", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
     ctl1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_CONTROLLER_TYPE: "sas", pyvbcc.KEY_CONTROLLER_CHIPSET: "LSILogicSAS", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
-
+    dst0 = { pyvbcc.KEY_VM_NAME: "vm1", }
     cli = CreateVmCommand( vm1 ).run()
     cli = CreateControllerCommand( ctl0 ).run()
     cli = CreateControllerCommand( ctl1 ).run()
