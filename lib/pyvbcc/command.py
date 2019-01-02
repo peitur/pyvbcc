@@ -200,17 +200,17 @@ class AttachDiskCommand( GenericCommand ):
         self._comment = None
         self._passthrough = "on"
 
-        if pyvbcc.KEY_DISKS_PORT in cfg: self._port = cfg[ pyvbcc.KEY_DISKS_PORT ]
-        if pyvbcc.KEY_DISKS_MTYPE in cfg: self._mtype = cfg[ pyvbcc.KEY_DISKS_MTYPE ]
-        if pyvbcc.KEY_DISKS_DEVICE in cfg: self._device = cfg[ pyvbcc.KEY_DISKS_DEVICE ]
-        if pyvbcc.KEY_DISKS_COMMENT in cfg: self._comment = cfg[ pyvbcc.KEY_DISKS_COMMENT ]
-        if pyvbcc.KEY_DISKS_PASSTHROUGH in cfg: self._passthrough = cfg[ pyvbcc.KEY_DISKS_PASSTHROUGH ]
-
         params = ["VBoxManage"
             "storageattach", self._vm,
             "--storagectl", self._controller,
             "--medium", self._disk
         ]
+
+        if pyvbcc.KEY_DISKS_PORT in cfg: self._port = cfg[ pyvbcc.KEY_DISKS_PORT ]
+        if pyvbcc.KEY_DISKS_MTYPE in cfg: self._mtype = cfg[ pyvbcc.KEY_DISKS_MTYPE ]
+        if pyvbcc.KEY_DISKS_DEVICE in cfg: self._device = cfg[ pyvbcc.KEY_DISKS_DEVICE ]
+        if pyvbcc.KEY_DISKS_COMMENT in cfg: self._comment = cfg[ pyvbcc.KEY_DISKS_COMMENT ]
+        if pyvbcc.KEY_DISKS_PASSTHROUGH in cfg: self._passthrough = cfg[ pyvbcc.KEY_DISKS_PASSTHROUGH ]
 
         if self._port: params + list( [ "--port", self._port ] )
         if self._device: params + list( [ "--device", self._device ] )
@@ -256,7 +256,6 @@ class DeleteVmCommand( GenericCommand ):
         del_str = ""
         if self._delete:
             del_str = "--delete"
-
 
         super().__init__( ["VBoxManage", "unregistervm", self._vm, del_str ], **opt )
 
