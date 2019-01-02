@@ -28,13 +28,15 @@ KEY_CONTROLLER_BOOTABLE="controller.bootable"
 KEY_CONTROLLER_PCOUNT="controller.pcount"
 
 
-KEY_DISKS_VM_NAME="disk.name"
+KEY_DISKS_NAME="disk.name"
+KEY_DISKS_FILE="disk.filename"
 KEY_DISKS_COMMENT="disk.comment"
 KEY_DISKS_PORT="disk.port"
-KEY_DISKS_PORT="disk.port"
+KEY_DISKS_FORMAT="disk.format"
 KEY_DISKS_DEVICE="disk.device"
 KEY_DISKS_MTYPE="disk.mtype"
 KEY_DISKS_PASSTHROUGH="disk.passthrough"
+KEY_DISKS_SIZE="disk.size"
 
 ##
 KEY_NETWORK_NAME="network.name"
