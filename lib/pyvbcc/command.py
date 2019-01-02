@@ -168,7 +168,8 @@ class CreateControllerCommand( GenericCommand ):
             "--controller", self._chipset,
             "--name", self._name,
             "--portcount", self._pcount,
-            "--bootable", self._bootable
+            "--bootable", self._bootable,
+            "--hostiocache", self._iocache
         ], **opt )
 
 
@@ -191,6 +192,7 @@ class AttachDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
         self._filename = cfg[ pyvbcc.KEY_DISK_FILE ]
+        self._iocache = True
 
         super().__init__( ["VBoxManage"
             "storageattach", self._vm
@@ -226,13 +228,13 @@ class DeleteVmCommand( GenericCommand ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
         self._delete = True
 
-
         if pyvbcc.KEY_VM_DELETE in cfg and cfg[ pyvbcc.KEY_VM_DELETE ] in (True, False):
             self._delete = cfg[ pyvbcc.KEY_VM_DELETE ]
 
         del_str = ""
         if self._delete:
             del_str = "--delete"
+
 
         super().__init__( ["VBoxManage", "unregistervm", self._vm, del_str ], **opt )
 
@@ -242,10 +244,12 @@ class DeleteVmCommand( GenericCommand ):
 if __name__ == "__main__":
     import time
     vm1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64" }
+    ctl0 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_CONTROLLER_TYPE: "ide", pyvbcc.KEY_CONTROLLER_PCOUNT: "2", pyvbcc.KEY_CONTROLLER_CHIPSET: "PIIX4", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
     ctl1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_CONTROLLER_TYPE: "sas", pyvbcc.KEY_CONTROLLER_CHIPSET: "LSILogicSAS", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
 
     cli = CreateVmCommand( vm1 ).run()
+    cli = CreateControllerCommand( ctl0 ).run()
     cli = CreateControllerCommand( ctl1 ).run()
-    time.sleep(10)
+    time.sleep(60)
     cli = DeleteVmCommand( vm1 ).run()
     pass

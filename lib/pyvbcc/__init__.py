@@ -18,6 +18,7 @@ KEY_VM_OSTYPE="vm.ostyoe"
 KEY_VM_CPUS="vm.cpus"
 KEY_VM_MEMORY="vm.mem"
 KEY_VM_CPUCAP="vm.ccap"
+KEY_VM_DELETE="vm.delete"
 
 
 KEY_CONTROLLER_NAME="contoller.name"
