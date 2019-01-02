@@ -168,8 +168,8 @@ class CreateControllerCommand( GenericCommand ):
             "--controller", self._chipset,
             "--name", self._name,
             "--portcount", self._pcount,
-            "--bootable", self._bootable ],
-        **opt )
+            "--bootable", self._bootable
+        ], **opt )
 
 
 class CreateDiskCommand( GenericCommand ):
@@ -209,8 +209,8 @@ class CreateVmCommand( GenericCommand ):
             "--name", self._name,
             "--groups", self._group,
             "--ostype", self._ostype,
-            "--register" ],
-        **opt )
+            "--register"
+        ], **opt )
 
 
 class ModifyVmCommand( GenericCommand ):
@@ -223,18 +223,19 @@ class ModifyVmCommand( GenericCommand ):
 class DeleteVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
-        super().__init__( ["VBoxManage", "modifyvm" ], **opt )
-        self._group = group
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        super().__init__( ["VBoxManage", "unregistervm", self._vm, "--delete" ], **opt )
 
-    def run( self ):
-        pass
 
 
 
 if __name__ == "__main__":
+    import time
     vm1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64" }
     ctl1 = { pyvbcc.KEY_VM_NAME: "vm1", pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_CONTROLLER_TYPE: "sas", pyvbcc.KEY_CONTROLLER_CHIPSET: "LSILogicSAS", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
 
     cli = CreateVmCommand( vm1 ).run()
     cli = CreateControllerCommand( ctl1 ).run()
+    time.sleep(10)
+    cli = DeleteVmCommand( vm1 ).run()
     pass
