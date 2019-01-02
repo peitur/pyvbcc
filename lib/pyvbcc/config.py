@@ -6,7 +6,9 @@ import json
 from pathlib import Path
 from pprint import pprint
 
+import pyvbcc
 import pyvbcc.utils
+import pyvbcc.validate
 
 ################################################################################################
 ## Tool specific configuration

@@ -2,7 +2,10 @@
   "name":"group1",
   "networks":[],
   "vms":[
-    {"name":"vm1","nics":[], "cpus":"1","ccap":"75","memory":"1024","disks":[],"iso":""},
+    {"name":"vm1","nics":[], "cpus":"1","ccap":"75","memory":"512","disks":[],"iso":""},
+    {"name":"vm2","nics":[], "cpus":"1","ccap":"75","memory":"512","disks":[],"iso":""},
+    {"name":"vm3","nics":[], "cpus":"1","ccap":"75","memory":"512","disks":[],"iso":""},
+    {"name":"vm4","nics":[], "cpus":"1","ccap":"75","memory":"512","disks":[],"iso":""}
   ],
   "include":[]
 }

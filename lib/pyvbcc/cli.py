@@ -84,17 +84,23 @@ class InfoCommandLine( CommonCommandLine ):
 
     def action( self ):
         if pyvbcc.KEY_VM_NAME in self._opt:
-            res = pyvbcc.command.InfoVmCommand( self._opt[ pyvbcc.KEY_VM_NAME ] ).run()
+            res = None
+            if self._opt[ pyvbcc.KEY_VM_NAME ] == "all":
+                res = pyvbcc.command.ListVmsCommand( ).run()
+            else:
+                res = pyvbcc.command.InfoVmCommand( self._opt[ pyvbcc.KEY_VM_NAME ] ).run()
             pprint( res )
-        elif pyvbcc.KEY_NETWORK_NAME in self._opt:
+
+        if pyvbcc.KEY_NETWORK_NAME in self._opt:
             allnets = dict()
             for t in ["intnets", "bridgedifs", "hostonlyifs", "natnets"]:
                 allnets[ t ] = pyvbcc.command.ListNetworkCommand( t, self._opt[ pyvbcc.KEY_NETWORK_NAME ] ).run()
             pprint( allnets )
-        elif pyvbcc.KEY_DISKS_VM_NAME in self._opt:
+        if pyvbcc.KEY_DISKS_VM_NAME in self._opt:
             res = pyvbcc.command.ListDiskCommand( self._opt[ pyvbcc.KEY_DISKS_VM_NAME ] ).run()
             pprint( res )
-        elif pyvbcc.KEY_GROUP_NAME in self._opt:
+
+        if pyvbcc.KEY_GROUP_NAME in self._opt:
             res = pyvbcc.command.ListGroupCommand( self._opt[ pyvbcc.KEY_GROUP_NAME ] ).run()
             pprint( res )
 
