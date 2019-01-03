@@ -324,13 +324,11 @@ if __name__ == "__main__":
     atts0 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_DISKS_FILE: vmfile }
 
     cli = CreateVmCommand( vm1 ).run()
-
-    cli = CreateDiskCommand( dks0 ).run()
-
     cli = CreateControllerCommand( ctl0 ).run()
     cli = CreateControllerCommand( ctl1 ).run()
-    cli = AttachDiskCommand( atts0 ).run()
+    cli = CreateDiskCommand( dks0 ).run()
+#    cli = AttachDiskCommand( atts0 ).run()
 
-    time.sleep(60)
-    cli = DeleteVmCommand( vm1 ).run()
+#    time.sleep(60)
+#    cli = DeleteVmCommand( vm1 ).run()
     pass
