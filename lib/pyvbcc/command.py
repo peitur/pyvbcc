@@ -312,6 +312,16 @@ class ModifyVmCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
 
+        self._groups = None
+        self._cpus = None
+        self._cpu_hotplug = None
+        self._cpu_limit = None
+        self._memory = None
+        self._vram = None
+
+        self._nics = list()
+
+
         params = ["VBoxManage", "modifyvm", self._vm ]
 
         if self._port: params += list( [ "--port", self._port ] )
@@ -342,7 +352,7 @@ if __name__ == "__main__":
     info = ListSystemPropertiesCommand().run()
     home = pyvbcc.utils.read_env("HOME")
 
-    vm = "vm1"
+    vm = "vm2"
     group = "test1"
     vmdir = "%s/%s/%s" % ( info["defaultmachinefolder"], group, vm )
     vmfile = "%s/%s.vmdk" % ( vmdir, vm )
@@ -360,7 +370,11 @@ if __name__ == "__main__":
     cli = CreateControllerCommand( ctl1 ).run()
     cli = CreateDiskCommand( dks0 ).run()
     cli = AttachDiskCommand( atts0 ).run()
-    cli = AttachDiskCommand( atts1 ).run()
+    if os.path.exists( dvdfile ):
+        cli = AttachDiskCommand( atts1 ).run()
+    else:
+        print("ERROR: Install ISO was not found ... skipping: %s" % ( dvdfile ) )
+
     time.sleep(60)
     cli = DeleteVmCommand( vm1 ).run()
     pass
