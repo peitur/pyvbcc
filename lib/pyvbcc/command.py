@@ -216,6 +216,29 @@ class CreateDiskCommand( GenericCommand ):
             "--size", self._size
         ], **opt )
 
+
+
+class CloseDiskCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+
+        if pyvbcc.KEY_DISKS_FILE not in cfg:
+            raise AttributeError("Missing disk filename trying to close")
+
+        self._filename = cfg[ pyvbcc.KEY_DISKS_FILE ]
+
+        self._delete = True
+        if pyvbcc.KEY_DISKS_DELETE in cfg and cfg[ pyvbcc.KEY_DISKS_DELETE ] in (True, False):
+            self._delete = cfg[ pyvbcc.KEY_VM_DELETE ]
+
+        del_str = ""
+        if self._delete:
+            del_str = "--delete"
+
+        super().__init__( ["VBoxManage",
+            "closemdium", "disk", self._filename,
+            del_str
+        ], **opt )
+
 class AttachDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_CONTROLLER_NAME not in cfg or pyvbcc.KEY_DISKS_FILE  not in cfg:
@@ -285,9 +308,13 @@ class CreateVmCommand( GenericCommand ):
 class ModifyVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
-        super().__init__( ["VBoxManage", "modifyvm" ], **opt )
-        self._group = group
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
 
+        params = ["VBoxManage", "modifyvm", self._vm ]
+
+        if self._port: params += list( [ "--port", self._port ] )
+
+        super().__init__( params, **opt )
 
 class DeleteVmCommand( GenericCommand ):
 
@@ -327,8 +354,7 @@ if __name__ == "__main__":
     cli = CreateControllerCommand( ctl0 ).run()
     cli = CreateControllerCommand( ctl1 ).run()
     cli = CreateDiskCommand( dks0 ).run()
-#    cli = AttachDiskCommand( atts0 ).run()
-
-#    time.sleep(60)
-#    cli = DeleteVmCommand( vm1 ).run()
+    cli = AttachDiskCommand( atts0 ).run()
+    time.sleep(60)
+    cli = DeleteVmCommand( vm1 ).run()
     pass

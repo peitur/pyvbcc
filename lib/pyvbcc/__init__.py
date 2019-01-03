@@ -37,6 +37,7 @@ KEY_DISKS_DEVICE="disk.device"
 KEY_DISKS_MTYPE="disk.mtype"
 KEY_DISKS_PASSTHROUGH="disk.passthrough"
 KEY_DISKS_SIZE="disk.size"
+KEY_DISKS_DELETE="disk.delete"
 
 ##
 KEY_NETWORK_NAME="network.name"
