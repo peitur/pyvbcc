@@ -312,19 +312,134 @@ class ModifyVmCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
 
+        self._ostype = None
         self._groups = None
+        self._description = None
         self._cpus = None
         self._cpu_hotplug = None
         self._cpu_limit = None
         self._memory = None
         self._vram = None
-
-        self._nics = list()
-
+        self._audio = None
+        self._pae = None
+        self._acpi = None
+        self._apic = None
+        self._pagefusion = None
+        self._firmware = None
+        self._chipset = None
+        self._usb = None
+        self._keyboard = None
+        self._mouse = None
 
         params = ["VBoxManage", "modifyvm", self._vm ]
 
         if self._port: params += list( [ "--port", self._port ] )
+
+        super().__init__( params, **opt )
+
+
+
+class ModifyVmBootCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
+            raise AttributeError("Missing vm name and NIC id")
+
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._boot_id = cfg[ pyvbcc.KEY_BOOT_ID ]
+
+        params = ["VBoxManage", "modifyvm", self._vm ]
+
+        super().__init__( params, **opt )
+
+
+class ModifyVmNicCommand( GenericCommand ):
+
+    def __init__( self, cfg = {}, **opt ):
+
+        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
+            raise AttributeError("Missing vm name and NIC id")
+
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
+
+        self._nic_net = None
+        self._nic_mac = None
+        self._nic_connected = None
+        self._nic_type = None
+        self._nic_trace = None
+        self._nic_trace_file = None
+        self._nic_property = None
+        self._nic_speed = None
+        self._nic_bootprio = None
+        self._nic_promisc = None
+        self._nic_bandwidth_group = None
+        self._nic_genericdrv = None
+
+        if pyvbcc.KEY_NIC_NET in cfg: self._nic_net = cfg[ pyvbcc.KEY_NIC_NET ]
+        if pyvbcc.KEY_NIC_MAC in cfg: self._nic_mac = cfg[ pyvbcc.KEY_NIC_MAC ]
+        if pyvbcc.KEY_NIC_CONNECTED in cfg: self._nic_connected = cfg[ pyvbcc.KEY_NIC_CONNECTED ]
+        if pyvbcc.KEY_NIC_TYPE in cfg: self._nic_type = cfg[ pyvbcc.KEY_NIC_TYPE ]
+        if pyvbcc.KEY_NIC_TRACE in cfg: self._nic_trace = cfg[ pyvbcc.KEY_NIC_TRACE ]
+        if pyvbcc.KEY_NIC_TRACEFILE in cfg: self._nic_trace_file = cfg[ pyvbcc.KEY_NIC_TRACEFILE ]
+        if pyvbcc.KEY_NIC_PROPERTY in cfg: self._nic_property = cfg[ pyvbcc.KEY_NIC_PROPERTY ]
+        if pyvbcc.KEY_NIC_SPEED in cfg: self._nic_speed = cfg[ pyvbcc.KEY_NIC_SPEED ]
+        if pyvbcc.KEY_NIC_BOOTPRIO in cfg: self._nic_bootprio = cfg[ pyvbcc.KEY_NIC_BOOTPRIO ]
+        if pyvbcc.KEY_NIC_PROMISC in cfg: self._nic_promisc = cfg[ pyvbcc.KEY_NIC_PROMISC ]
+        if pyvbcc.KEY_NIC_BANDWIDTH_GROUP in cfg: self._nic_bandwidth_group = cfg[ pyvbcc.KEY_NIC_BANDWIDTH_GROUP ]
+        if pyvbcc.KEY_NIC_GENERICDRV in cfg: self._nic_genericdrv = cfg[ pyvbcc.KEY_NIC_GENERICDRV ]
+
+        params = ["VBoxManage", "modifyvm", self._vm ]
+        if self._nic_net: params += list( [ "--nic%s" % (self._nic_id), self._nic_net ] )
+        if self._nic_mac: params += list( [ "--macaddress%s" % (self._nic_id), self._nic_mac ] )
+        if self._nic_connected: params += list( [ "--cableconnected%s" % (self._nic_id), self._nic_connected ] )
+        if self._nic_type: params += list( [ "--nictype%s" % (self._nic_id), self._nic_type ] )
+        if self._nic_trace: params += list( [ "--nictrace%s" % (self._nic_id), self._nic_trace ] )
+        if self._nic_trace_file: params += list( [ "--nictracefile%s" % (self._nic_id), self._nic_trace_file ] )
+        if self._nic_speed: params += list( [ "--nicspee%s" % (self._nic_id), self._nic_speed ] )
+        if self._nic_bootprio: params += list( [ "--nicbootprio%s" % (self._nic_id), self._nic_bootprio ] )
+        if self._nic_promisc: params += list( [ "--nicpromisc%s" % (self._nic_id), self._nic_promisc ] )
+        if self._nic_bandwidth_group: params += list( [ "--nicbandwidthgroup%s" % (self._nic_id), self._nic_bandwidth_group ] )
+        if self._nic_genericdrv: params += list( [ "--nicgenericdrv%s" % (self._nic_id), self._nic_genericdrv ] )
+
+#        if self._nic_property: params += list( [ "--nicproperty%s" % (self._nic_id), self._nic_property ] )
+
+        super().__init__( params, **opt )
+
+
+class ModifyVmNatNicCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
+            raise AttributeError("Missing vm name and NIC id")
+
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
+
+        params = ["VBoxManage", "modifyvm", self._vm ]
+
+        super().__init__( params, **opt )
+
+
+class ModifyVmHostOnlyNicCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
+            raise AttributeError("Missing vm name and NIC id")
+
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
+
+        params = ["VBoxManage", "modifyvm", self._vm ]
+
+        super().__init__( params, **opt )
+
+class ModifyVmInteNetNicCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
+            raise AttributeError("Missing vm name and NIC id")
+
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
+
+        params = ["VBoxManage", "modifyvm", self._vm ]
 
         super().__init__( params, **opt )
 
