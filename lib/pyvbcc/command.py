@@ -310,10 +310,13 @@ class CreateVmCommand( GenericCommand ):
 class ModifyVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg:
+            raise AttributeError("Missing vm name")
+
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
 
         self._ostype = None
-        self._groups = None
+        self._group = None
         self._description = None
         self._cpus = None
         self._cpu_hotplug = None
@@ -331,9 +334,44 @@ class ModifyVmCommand( GenericCommand ):
         self._keyboard = None
         self._mouse = None
 
+        if pyvbcc.KEY_VM_OSTYPE in cfg: self._ostype = cfg[ pyvbcc.KEY_VM_OSTYPE ]
+        if pyvbcc.KEY_VM_GROUP in cfg: self._group = cfg[ pyvbcc.KEY_VM_GROUP ]
+        if pyvbcc.KEY_VM_DESCRIPTION in cfg: self._description = cfg[ pyvbcc.KEY_VM_DESCRIPTION ]
+        if pyvbcc.KEY_VM_CPUS in cfg: self._cpus = cfg[ pyvbcc.KEY_VM_CPUS ]
+        if pyvbcc.KEY_VM_CPU_HOTPLUG in cfg: self._cpu_hotplug = cfg[ pyvbcc.KEY_VM_CPU_HOTPLUG ]
+        if pyvbcc.KEY_VM_CPUCAP in cfg: self._cpu_limit = cfg[ pyvbcc.KEY_VM_CPUCAP ]
+        if pyvbcc.KEY_VM_MEMORY in cfg: self._memory = cfg[ pyvbcc.KEY_VM_MEMORY ]
+        if pyvbcc.KEY_VM_VRAM in cfg: self._vram = cfg[ pyvbcc.KEY_VM_VRAM ]
+        if pyvbcc.KEY_VM_AUDIO in cfg: self._audio = cfg[ pyvbcc.KEY_VM_AUDIO ]
+        if pyvbcc.KEY_VM_PAE in cfg: self._pae = cfg[ pyvbcc.KEY_VM_PAE ]
+        if pyvbcc.KEY_VM_ACPI in cfg: self._acpi = cfg[ pyvbcc.KEY_VM_ACPI ]
+        if pyvbcc.KEY_VM_APIC in cfg: self._apic = cfg[ pyvbcc.KEY_VM_APIC ]
+        if pyvbcc.KEY_VM_PAGEFUSION in cfg: self._pagefusion = cfg[ pyvbcc.KEY_VM_PAGEFUSION ]
+        if pyvbcc.KEY_VM_FIRMWARE in cfg: self._firmware = cfg[ pyvbcc.KEY_VM_FIRMWARE ]
+        if pyvbcc.KEY_VM_CHIPSET in cfg: self._chipset = cfg[ pyvbcc.KEY_VM_CHIPSET ]
+        if pyvbcc.KEY_VM_USB in cfg: self. _usb= cfg[ pyvbcc.KEY_VM_USB ]
+        if pyvbcc.KEY_VM_KEYBOARD in cfg: self._keyboard = cfg[ pyvbcc.KEY_VM_KEYBOARD ]
+        if pyvbcc.KEY_VM_MOUSE in cfg: self._mouse = cfg[ pyvbcc.KEY_VM_MOUSE ]
+
         params = ["VBoxManage", "modifyvm", self._vm ]
 
-        if self._port: params += list( [ "--port", self._port ] )
+        if self._ostype: params += list( [ "--ostype", self._ostype ] )
+        if self._group: params += list( [ "--groups", self._group ] )
+        if self._description: params += list( [ "--description", self._description ] )
+        if self._cpus: params += list( [ "--cpus", self._cpus ] )
+        if self._cpu_limit: params += list( [ "--cpuexecutioncap", self._cpu_limit ] )
+        if self._cpu_hotplug: params += list( [ "--cpuhotplug", self._cpu_hotplug ] )
+        if self._memory: params += list( [ "--memory", self._memory ] )
+        if self._vram: params += list( [ "--vram", self._vram ] )
+        if self._pae: params += list( [ "--pae", self._pae ] )
+        if self._acpi: params += list( [ "--acpi", self._acpi ] )
+        if self._apic: params += list( [ "--apic", self._apic ] )
+        if self._pagefusion: params += list( [ "--pagefusion", self._pagefusion ] )
+        if self._firmware: params += list( [ "--firmware", self._firmware ] )
+        if self._chipset: params += list( [ "--chipset", self._chipset ] )
+        if self._usb: params += list( [ "--usb", self._usb ] )
+        if self._keyboard: params += list( [ "--keyboard", self._keyboard ] )
+        if self._mouse: params += list( [ "--mouse", self._mouse ] )
 
         super().__init__( params, **opt )
 
@@ -473,14 +511,15 @@ if __name__ == "__main__":
     vmfile = "%s/%s.vmdk" % ( vmdir, vm )
     dvdfile = "%s/Downloads/CentOS-7-x86_64-NetInstall-1810.iso" % ( home )
 
-    vm1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64", pyvbcc.KEY_DISKS_FILE: vmfile }
-    ctl0 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_CONTROLLER_TYPE: "ide", pyvbcc.KEY_CONTROLLER_PCOUNT: "2", pyvbcc.KEY_CONTROLLER_CHIPSET: "PIIX4", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
+    vm1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64", pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_VM_MOUSE: "ps2", pyvbcc.KEY_VM_MEMORY: "512", pyvbcc.KEY_VM_AUDIO: "null", pyvbcc.KEY_VM_USB: "off", pyvbcc.KEY_VM_CPUCAP: "50", pyvbcc.KEY_VM_CPUS:"1" }
+    ctl0 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_CONTROLLER_TYPE: "ide", pyvbcc.KEY_CONTROLLER_PCOUNT: "2", pyvbcc.KEY_CONTROLLER_CHIPSET: "PIIX4", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on"}
     ctl1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_CONTROLLER_TYPE: "sas", pyvbcc.KEY_CONTROLLER_CHIPSET: "LSILogicSAS", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
     dks0 = { pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_DISKS_FORMAT:"vmdk", pyvbcc.KEY_DISKS_NAME:"dm1-disk", pyvbcc.KEY_DISKS_SIZE: "4096"}
     atts0 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_DISKS_FILE: vmfile }
     atts1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_DISKS_FILE: dvdfile, pyvbcc.KEY_DISKS_TYPE: "dvddrive" }
 
     cli = CreateVmCommand( vm1 ).run()
+    cli = ModifyVmCommand( vm1 ).run()
     cli = CreateControllerCommand( ctl0 ).run()
     cli = CreateControllerCommand( ctl1 ).run()
     cli = CreateDiskCommand( dks0 ).run()
