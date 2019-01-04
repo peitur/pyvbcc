@@ -296,13 +296,21 @@ class CreateVmCommand( GenericCommand ):
         self._group = "/%s" % (  cfg[ pyvbcc.KEY_GROUP_NAME ] )
         self._ostype = cfg[  pyvbcc.KEY_VM_OSTYPE ]
         self._name = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._register = True
+
+        if pyvbcc.KEY_VM_REGISTER in cfg and cfg[ pyvbcc.KEY_VM_NAME ] in (True, False):
+            self._register = cfg[ pyvbcc.KEY_VM_NAME ]
+
+        reg_str = ""
+        if self._register:
+            reg_str = "--register"
 
         super().__init__( ["VBoxManage",
             "createvm",
             "--name", self._name,
             "--groups", self._group,
             "--ostype", self._ostype,
-            "--register"
+            reg_str
         ], **opt )
 
 
@@ -383,7 +391,7 @@ class ModifyVmBootCommand( GenericCommand ):
             raise AttributeError("Missing vm name and NIC id")
 
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._boot_id = cfg[ pyvbcc.KEY_BOOT_ID ]
+        self._boot_order = cfg[ pyvbcc.KEY_BOOT_ORDER ]
 
         params = ["VBoxManage", "modifyvm", self._vm ]
 
@@ -444,15 +452,65 @@ class ModifyVmNicCommand( GenericCommand ):
         super().__init__( params, **opt )
 
 
-class ModifyVmNatNicCommand( GenericCommand ):
+class CreateNatNetworkCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
-        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
-            raise AttributeError("Missing vm name and NIC id")
+        if pyvbcc.KEY_NETWORK_NAME not in cfg or pyvbcc.KEY_NETWORK_ADDR not in cfg or pyvbcc.KEY_NETWORK_CIDR not in cfg:
+            raise AttributeError("Missing nat network name or network address or cidr")
 
-        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
+        self._enabled = True
+        self._dhcp = True
+        self._ipv6 = False
+        self._network = cfg[ pyvbcc.KEY_NETWORK_ADDR ]
+        self._cidr = cfg[ pyvbcc.KEY_NETWORK_CIDR ]
+        self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        params = ["VBoxManage", "modifyvm", self._vm ]
+        params = ["VBoxManage", "natnetwork", "add",
+            "--netname", self._nat_name,
+            "--network", "%s/%s" % (self._network, self._cidr)
+        ]
+
+        if pyvbcc.KEY_NETWORK_ENABLED in cfg: self._enabled = cfg[ pyvbcc.KEY_NETWORK_ENABLED ]
+        if pyvbcc.KEY_NETWORK_IPV6 in cfg: self._ipv6 = cfg[ pyvbcc.KEY_NETWORK_IPV6 ]
+        if pyvbcc.KEY_NETWORK_DHCP in cfg: self._dhcp = cfg[ pyvbcc.KEY_NETWORK_DHCP ]
+
+        enable_str = "--enable"
+        if not self._enabled:
+            enable_str = "--disable"
+
+        dhcp_str = "on"
+        if not self._enabled:
+            dhcp_str = "off"
+
+        ipv6_str = "off"
+        if self._enabled:
+            ipv6_str = "on"
+
+        if self._nic_genericdrv: params += list( [ enable_str ] )
+        if self._nic_genericdrv: params += list( [ "--dhcp", dhcp_str ] )
+        if self._nic_genericdrv: params += list( [ "--ipv6", ipv6_str ] )
+
+        super().__init__( params, **opt )
+
+
+class ModifyNatNetworkCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_NETWORK_NAME not in cfg:
+            raise AttributeError("Missing nat network name")
+
+        self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
+
+        params = ["VBoxManage", "natnetwork", "modify", self._nat_name ]
+
+        super().__init__( params, **opt )
+
+class DeleteNatNetworkCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_NETWORK_NAME not in cfg:
+            raise AttributeError("Missing nat network name")
+
+        self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
+
+        params = ["VBoxManage", "natnetwork", remove, self._nat_name ]
 
         super().__init__( params, **opt )
 
@@ -462,14 +520,14 @@ class ModifyVmHostOnlyNicCommand( GenericCommand ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
             raise AttributeError("Missing vm name and NIC id")
 
-        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        self._net_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
         self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
 
         params = ["VBoxManage", "modifyvm", self._vm ]
 
         super().__init__( params, **opt )
 
-class ModifyVmInteNetNicCommand( GenericCommand ):
+class ModifyVmIntNetNicCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
             raise AttributeError("Missing vm name and NIC id")
@@ -527,7 +585,7 @@ if __name__ == "__main__":
     if os.path.exists( dvdfile ):
         cli = AttachDiskCommand( atts1 ).run()
     else:
-        print("ERROR: Install ISO was not found ... skipping: %s" % ( dvdfile ) )
+        print("Install ISO %s was not found ... skipping" % ( dvdfile ) )
 
     time.sleep(60)
     cli = DeleteVmCommand( vm1 ).run()

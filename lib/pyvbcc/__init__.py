@@ -33,10 +33,12 @@ KEY_VM_USB="vm.usb"
 KEY_VM_KEYBOARD="vm.keyboard"
 KEY_VM_MOUSE="vm.mouse"
 KEY_VM_DELETE="vm.delete"
+KEY_VM_REGISTER="vm.register"
 
 ##
-KEY_BOOT_ID="boot.id"
+KEY_BOOT_ORDER="boot.order"
 KEY_BOOT_DEVICE="boot.device"
+
 ##
 
 KEY_CONTROLLER_NAME="contoller.name"
@@ -60,6 +62,12 @@ KEY_DISKS_DELETE="disk.delete"
 
 ##
 KEY_NETWORK_NAME="network.name"
+KEY_NETWORK_ADDR="network.address"
+KEY_NETWORK_CIDR="network.cidr"
+KEY_NETWORK_ENABLED="network.name"
+KEY_NETWORK_DHCP="network.name"
+KEY_NETWORK_IPV6="network.name"
+
 
 
 KEY_NIC_ID="nic.id"
