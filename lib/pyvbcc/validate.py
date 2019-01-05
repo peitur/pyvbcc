@@ -34,6 +34,7 @@ class Validator( object ):
     def _matches( self, rxtype, key, data, **opt ):
         matches = 0
         patterns = self._map[key][ rxtype ]
+        
         for p in patterns:
             if rxtype == "match":
                 if re.match( p, data ): matches += 1

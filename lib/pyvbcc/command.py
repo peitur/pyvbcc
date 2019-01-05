@@ -302,7 +302,7 @@ class RegisterVmCommand( GenericCommand ):
             "registervm", self._filename
         ], **opt )
 
-class CreateVmCommand( GenericCommand ):
+class _CreateVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
         self._group = "/%s" % (  cfg[ pyvbcc.KEY_GROUP_NAME ] )
@@ -326,6 +326,38 @@ class CreateVmCommand( GenericCommand ):
         ], **opt )
 
 
+class CreateVmCommand( GenericCommand ):
+
+    def __init__( self, cfg = {}, **opt ):
+
+        self._cfg = cfg
+        self._validmap = {
+            pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
+            pyvbcc.KEY_VM_OSTYPE: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
+            pyvbcc.KEY_GROUP_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
+            pyvbcc.KEY_VM_REGISTER: { "match":["True", "False"] }
+        }
+
+        opt["strict"] = False
+        pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
+
+        self._register = True
+        if pyvbcc.KEY_VM_REGISTER in self._cfg and self._cfg[ pyvbcc.KEY_VM_NAME ] in (True, False):
+            self._register = self._cfg[ pyvbcc.KEY_VM_NAME ]
+
+        reg_str = ""
+        if self._register: reg_str = "--register"
+
+        super().__init__( ["VBoxManage",
+            "createvm",
+            "--name", self._cfg[ pyvbcc.KEY_VM_NAME ],
+            "--groups", "/%s" % (  self._cfg[ pyvbcc.KEY_GROUP_NAME ] ),
+            "--ostype", self._cfg[  pyvbcc.KEY_VM_OSTYPE ],
+            reg_str
+        ], **opt )
+
+
+
 class DeleteVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
@@ -333,20 +365,19 @@ class DeleteVmCommand( GenericCommand ):
         self._validmap = {
             pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
             pyvbcc.KEY_VM_DELETE: { "match":["True", "False"] }
-
         }
 
         opt["strict"] = False
         pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
 
         self._delete = True
-        if pyvbcc.KEY_VM_DELETE in cfg : self._delete = cfg[ pyvbcc.KEY_VM_DELETE ]
+        if pyvbcc.KEY_VM_DELETE in self._cfg : self._delete = self._cfg[ pyvbcc.KEY_VM_DELETE ]
 
         del_str = ""
         if self._delete:
             del_str = "--delete"
 
-        super().__init__( ["VBoxManage", "unregistervm", cfg[ pyvbcc.KEY_VM_NAME ], del_str ], **opt )
+        super().__init__( ["VBoxManage", "unregistervm", self._cfg[ pyvbcc.KEY_VM_NAME ], del_str ], **opt )
 
 
 ###########################################################################################################################
