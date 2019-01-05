@@ -50,12 +50,16 @@ class Validator( object ):
         matches = self._matches( rxtype, key, data )
         if expmatches == matches:
             return True
+
+        print(">> %s %s" % ( key, data ) )
         return False
 
     def _any_pattern( self, rxtype, key, data, **opt ):
         matches = self._matches( rxtype, key, data )
         if matches > 0:
             return True
+            
+        print(">> %s %s" % ( key, data ) )
         return False
 
 

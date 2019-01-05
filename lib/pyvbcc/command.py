@@ -209,16 +209,22 @@ class CreateControllerCommand( GenericCommand ):
 ###########################################################################################################################
 class CreateDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
+        self._cfg = cfg
+        self._validmap = {
+            pyvbcc.KEY_DISKS_FILE: { "match": ["^[a-zA-Z0-9\-\._/ ]+$"], "mandatory":True },
+            pyvbcc.KEY_DISKS_SIZE: { "match": ["^[0-9]+$"] },
+            pyvbcc.KEY_DISKS_FORMAT: {"match": [ "vdi","vmdk" ,"vhd" ] }
+        }
 
-        if pyvbcc.KEY_DISKS_SIZE not in cfg or pyvbcc.KEY_DISKS_FILE not in cfg:
-            raise AttributeError("Missing disk size or filename")
+        opt["strict"] = False
+        pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
 
-        self._size = cfg[ pyvbcc.KEY_DISKS_SIZE ]
-        self._filename = cfg[ pyvbcc.KEY_DISKS_FILE ]
+        self._filename = self._cfg[ pyvbcc.KEY_DISKS_FILE ]
+        self._size = self._cfg[ pyvbcc.KEY_DISKS_SIZE ]
 
         self._format = "vmdk"
-        if pyvbcc.KEY_DISKS_FORMAT in cfg:
-            self._format = cfg[ pyvbcc.KEY_DISKS_FORMAT ]
+        if pyvbcc.KEY_DISKS_FORMAT in self._cfg :
+            self._format = self._cfg[ pyvbcc.KEY_DISKS_FORMAT ]
 
         super().__init__( ["VBoxManage",
             "createmedium", "disk",
@@ -232,32 +238,47 @@ class CreateDiskCommand( GenericCommand ):
 class CloseDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
 
-        if pyvbcc.KEY_DISKS_FILE not in cfg:
-            raise AttributeError("Missing disk filename trying to close")
+        self._cfg = cfg
+        self._validmap = {
+            pyvbcc.KEY_DISKS_FILE: { "match": ["^[a-zA-Z0-9\-\._/ ]+$"], "mandatory":True },
+            pyvbcc.KEY_DISKS_DELETE: { "match": ["True","False"] }
+        }
 
-        self._filename = cfg[ pyvbcc.KEY_DISKS_FILE ]
+        opt["strict"] = False
+        pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
 
         self._delete = True
-        if pyvbcc.KEY_DISKS_DELETE in cfg and cfg[ pyvbcc.KEY_DISKS_DELETE ] in (True, False):
-            self._delete = cfg[ pyvbcc.KEY_VM_DELETE ]
+        if self._cfg[ pyvbcc.KEY_DISKS_DELETE ]:
+            self._delete = self._cfg[ pyvbcc.KEY_DISKS_DELETE ]
 
         del_str = ""
         if self._delete:
             del_str = "--delete"
 
         super().__init__( ["VBoxManage",
-            "closemdium", "disk", self._filename,
+            "closemdium", "disk", self._cfg[ pyvbcc.KEY_DISKS_FILE ],
             del_str
         ], **opt )
 
+
 class AttachDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
-        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_CONTROLLER_NAME not in cfg or pyvbcc.KEY_DISKS_FILE  not in cfg:
-            raise AttributeError("Missint VM or Controller or Disk file in attach")
 
-        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._controller = cfg[ pyvbcc.KEY_CONTROLLER_NAME ]
-        self._disk = cfg[ pyvbcc.KEY_DISKS_FILE ]
+        self._cfg = cfg
+        self._validmap = {
+            pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
+            pyvbcc.KEY_CONTROLLER_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
+            pyvbcc.KEY_DISKS_FILE: { "match": ["^[a-zA-Z0-9\-\._/ ]+$"], "mandatory":True },
+            pyvbcc.KEY_DISKS_TYPE: {"match": ["hdd","dvddrive","fdd"] },
+            pyvbcc.KEY_DISKS_PORT: {"match": ["^[0-9]+$"] },
+            pyvbcc.KEY_DISKS_MTYPE: {"match": ["normal","writethrough","immutable","shareable","readonly","multiattach"] },
+            pyvbcc.KEY_DISKS_DEVICE: {"match": ["^[0-9]+$"] },
+            pyvbcc.KEY_DISKS_COMMENT: {"match": ["^.*$"] }
+        }
+
+        opt["strict"] = False
+        pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
+
         self._type = "hdd"
         self._port = "0"
         self._mtype = None
@@ -265,16 +286,16 @@ class AttachDiskCommand( GenericCommand ):
         self._comment = None
 
         params = ["VBoxManage",
-            "storageattach", self._vm,
-            "--storagectl", self._controller,
-            "--medium", self._disk
+            "storageattach", self._cfg[ pyvbcc.KEY_VM_NAME ],
+            "--storagectl", self._cfg[ pyvbcc.KEY_CONTROLLER_NAME ],
+            "--medium", self._cfg[ pyvbcc.KEY_DISKS_FILE ]
         ]
 
-        if pyvbcc.KEY_DISKS_TYPE in cfg: self._type = cfg[ pyvbcc.KEY_DISKS_TYPE ]
-        if pyvbcc.KEY_DISKS_PORT in cfg: self._port = cfg[ pyvbcc.KEY_DISKS_PORT ]
-        if pyvbcc.KEY_DISKS_MTYPE in cfg: self._mtype = cfg[ pyvbcc.KEY_DISKS_MTYPE ]
-        if pyvbcc.KEY_DISKS_DEVICE in cfg: self._device = cfg[ pyvbcc.KEY_DISKS_DEVICE ]
-        if pyvbcc.KEY_DISKS_COMMENT in cfg: self._comment = cfg[ pyvbcc.KEY_DISKS_COMMENT ]
+        if pyvbcc.KEY_DISKS_TYPE in self._cfg: self._type = self._cfg[ pyvbcc.KEY_DISKS_TYPE ]
+        if pyvbcc.KEY_DISKS_PORT in self._cfg: self._port = self._cfg[ pyvbcc.KEY_DISKS_PORT ]
+        if pyvbcc.KEY_DISKS_MTYPE in self._cfg: self._mtype = self._cfg[ pyvbcc.KEY_DISKS_MTYPE ]
+        if pyvbcc.KEY_DISKS_DEVICE in self._cfg: self._device = self._cfg[ pyvbcc.KEY_DISKS_DEVICE ]
+        if pyvbcc.KEY_DISKS_COMMENT in self._cfg: self._comment = self._cfg[ pyvbcc.KEY_DISKS_COMMENT ]
 
         if self._type: params += list( [ "--type", self._type ] )
         if self._port: params += list( [ "--port", self._port ] )
@@ -290,16 +311,19 @@ class AttachDiskCommand( GenericCommand ):
 class RegisterVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
-        if pyvbcc.KEY_DISKS_FILE not in cfg:
-            raise AttributeError( "No filename to register" )
+        self._cfg = cfg
+        self._validmap = {
+            pyvbcc.KEY_DISKS_FILE: { "match": ["^[a-zA-Z0-9\-\._/ ]+$"], "mandatory":True }
+        }
 
-        if not os.path.exists( cfg[ pyvbcc.KEY_DISKS_FILE ] ):
+        opt["strict"] = False
+        pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
+
+        if not os.path.exists( self._cfg[ pyvbcc.KEY_DISKS_FILE ] ):
             raise RuntimeError("Missing VM disk in registration")
 
-        self._filename = cfg[ pyvbcc.KEY_DISKS_FILE ]
-
         super().__init__( ["VBoxManage",
-            "registervm", self._filename
+            "registervm", self._cfg[ pyvbcc.KEY_DISKS_FILE ]
         ], **opt )
 
 class CreateVmCommand( GenericCommand ):
@@ -658,6 +682,6 @@ if __name__ == "__main__":
     else:
         print("Install ISO %s was not found ... skipping" % ( dvdfile ) )
 
-    time.sleep(5)
+    time.sleep(10)
     cli = DeleteVmCommand( vm1 ).run()
     pass
