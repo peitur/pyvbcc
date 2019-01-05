@@ -302,34 +302,9 @@ class RegisterVmCommand( GenericCommand ):
             "registervm", self._filename
         ], **opt )
 
-class _CreateVmCommand( GenericCommand ):
-
-    def __init__( self, cfg = {}, **opt ):
-        self._group = "/%s" % (  cfg[ pyvbcc.KEY_GROUP_NAME ] )
-        self._ostype = cfg[  pyvbcc.KEY_VM_OSTYPE ]
-        self._name = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._register = True
-
-        if pyvbcc.KEY_VM_REGISTER in cfg and cfg[ pyvbcc.KEY_VM_NAME ] in (True, False):
-            self._register = cfg[ pyvbcc.KEY_VM_NAME ]
-
-        reg_str = ""
-        if self._register:
-            reg_str = "--register"
-
-        super().__init__( ["VBoxManage",
-            "createvm",
-            "--name", self._name,
-            "--groups", self._group,
-            "--ostype", self._ostype,
-            reg_str
-        ], **opt )
-
-
 class CreateVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
-
         self._cfg = cfg
         self._validmap = {
             pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
@@ -342,7 +317,7 @@ class CreateVmCommand( GenericCommand ):
         pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
 
         self._register = True
-        if pyvbcc.KEY_VM_REGISTER in self._cfg and self._cfg[ pyvbcc.KEY_VM_NAME ] in (True, False):
+        if pyvbcc.KEY_VM_REGISTER in self._cfg:
             self._register = self._cfg[ pyvbcc.KEY_VM_NAME ]
 
         reg_str = ""
