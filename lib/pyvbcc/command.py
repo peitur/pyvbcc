@@ -14,6 +14,7 @@ class GenericCommand( object ):
     def __init__(self, cmd, **opt ):
         self._cmd = cmd
         self._debug = False
+        
         if pyvbcc.KEY_SYSTEM_DEBUG in opt and opt[ pyvbcc.KEY_SYSTEM_DEBUG ] in (True,False):
             self._debug = opt[ pyvbcc.KEY_SYSTEM_DEBUG ]
 
@@ -180,19 +181,34 @@ class ListGroupCommand( GenericCommand ):
 class CreateControllerCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
-        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._type = cfg[ pyvbcc.KEY_CONTROLLER_TYPE ]
-        self._chipset = cfg[ pyvbcc.KEY_CONTROLLER_CHIPSET ]
-        self._name = cfg[  pyvbcc.KEY_CONTROLLER_NAME ]
+        self._cfg = cfg
+        self._validmap = {
+            pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._/ ]+$"], "mandatory":True },
+            pyvbcc.KEY_CONTROLLER_TYPE: { "match": ["ide","sata","scsi","floppy","sas","usb","pcie"], "mandatory":True },
+            pyvbcc.KEY_CONTROLLER_CHIPSET: { "match": [ "LSILogic","LSILogicSAS","BusLogic","IntelAHCI","PIIX3","PIIX4","ICH6","I82078","USB","NVMe"
+ ], "mandatory":True },
+            pyvbcc.KEY_CONTROLLER_NAME: { "match": [ "^[a-zA-Z0-9\-\._/ ]+$" ], "mandatory":True },
+            pyvbcc.KEY_CONTROLLER_PCOUNT: { "match": ["^[0-9]+$"] },
+            pyvbcc.KEY_CONTROLLER_BOOTABLE: { "match": ["on","off"] }
+        }
+
+        opt["strict"] = False
+        pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
+
+        self._vm = self._cfg[ pyvbcc.KEY_VM_NAME ]
+        self._type = self._cfg[ pyvbcc.KEY_CONTROLLER_TYPE ]
+        self._chipset = self._cfg[ pyvbcc.KEY_CONTROLLER_CHIPSET ]
+        self._name = self._cfg[ pyvbcc.KEY_CONTROLLER_NAME ]
         self._pcount = "8"
         self._bootable = "off"
         self._iocache = "on"
 
-        if pyvbcc.KEY_CONTROLLER_PCOUNT in cfg:
-            self._pcount = cfg[ pyvbcc.KEY_CONTROLLER_PCOUNT ]
 
-        if pyvbcc.KEY_CONTROLLER_BOOTABLE in cfg:
-            self._bootable = cfg[ pyvbcc.KEY_CONTROLLER_BOOTABLE ]
+        if pyvbcc.KEY_CONTROLLER_PCOUNT in self._cfg:
+            self._pcount = self._cfg[ pyvbcc.KEY_CONTROLLER_PCOUNT ]
+
+        if pyvbcc.KEY_CONTROLLER_BOOTABLE in self._cfg:
+            self._bootable = self._cfg[ pyvbcc.KEY_CONTROLLER_BOOTABLE ]
 
         super().__init__( ["VBoxManage",
             "storagectl", self._vm,
@@ -279,11 +295,9 @@ class AttachDiskCommand( GenericCommand ):
         opt["strict"] = False
         pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
 
-        self._type = "hdd"
-        self._port = "0"
-        self._mtype = None
-        self._device = "0"
-        self._comment = None
+        if pyvbcc.KEY_DISKS_PORT not in self._cfg: self._cfg[ pyvbcc.KEY_DISKS_PORT ] = "0"
+        if pyvbcc.KEY_DISKS_TYPE not in self._cfg: self._cfg[ pyvbcc.KEY_DISKS_TYPE ] = "hdd"
+        if pyvbcc.KEY_DISKS_DEVICE not in self._cfg: self._cfg[ pyvbcc.KEY_DISKS_DEVICE ] = "0"
 
         params = ["VBoxManage",
             "storageattach", self._cfg[ pyvbcc.KEY_VM_NAME ],
@@ -291,17 +305,11 @@ class AttachDiskCommand( GenericCommand ):
             "--medium", self._cfg[ pyvbcc.KEY_DISKS_FILE ]
         ]
 
-        if pyvbcc.KEY_DISKS_TYPE in self._cfg: self._type = self._cfg[ pyvbcc.KEY_DISKS_TYPE ]
-        if pyvbcc.KEY_DISKS_PORT in self._cfg: self._port = self._cfg[ pyvbcc.KEY_DISKS_PORT ]
-        if pyvbcc.KEY_DISKS_MTYPE in self._cfg: self._mtype = self._cfg[ pyvbcc.KEY_DISKS_MTYPE ]
-        if pyvbcc.KEY_DISKS_DEVICE in self._cfg: self._device = self._cfg[ pyvbcc.KEY_DISKS_DEVICE ]
-        if pyvbcc.KEY_DISKS_COMMENT in self._cfg: self._comment = self._cfg[ pyvbcc.KEY_DISKS_COMMENT ]
-
-        if self._type: params += list( [ "--type", self._type ] )
-        if self._port: params += list( [ "--port", self._port ] )
-        if self._device: params += list( [ "--device", self._device ] )
-        if self._mtype: params += list( [ "--mtype", self._mtype ] )
-        if self._comment: params += list( [ "--comment", self._comment ] )
+        if pyvbcc.KEY_DISKS_TYPE in self._cfg: params += list( [ "--type", self._cfg[ pyvbcc.KEY_DISKS_TYPE ] ] )
+        if pyvbcc.KEY_DISKS_PORT in self._cfg: params += list( [ "--port", self._cfg[ pyvbcc.KEY_DISKS_PORT ] ] )
+        if pyvbcc.KEY_DISKS_MTYPE in self._cfg: params += list( [ "--mtype", self._cfg[ pyvbcc.KEY_DISKS_MTYPE ] ] )
+        if pyvbcc.KEY_DISKS_DEVICE in self._cfg: params += list( [ "--device", self._cfg[ pyvbcc.KEY_DISKS_DEVICE ] ] )
+        if pyvbcc.KEY_DISKS_COMMENT in self._cfg: params += list( [ "--comment", self._cfg[ pyvbcc.KEY_DISKS_COMMENT ] ] )
 
         super().__init__( params, **opt )
 
@@ -331,7 +339,7 @@ class CreateVmCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         self._cfg = cfg
         self._validmap = {
-            pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
+            pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._ ]+$"], "mandatory":True },
             pyvbcc.KEY_VM_OSTYPE: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
             pyvbcc.KEY_GROUP_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
             pyvbcc.KEY_VM_REGISTER: { "match":["True", "False"] }
