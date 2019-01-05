@@ -5,6 +5,7 @@ import subprocess, shlex
 
 import pyvbcc
 import pyvbcc.utils
+import pyvbcc.validate
 
 from pprint import pprint
 
@@ -30,7 +31,9 @@ class GenericCommand( object ):
             result.append( line.lstrip().rstrip() )
         return result
 
-
+###########################################################################################################################
+## Listing stuff commands
+###########################################################################################################################
 class ListVmsCommand( GenericCommand ):
     def __init__( self, **opt ):
         super().__init__( ["VBoxManage", "list", "vms", "--sorted"], **opt )
@@ -169,6 +172,11 @@ class ListGroupCommand( GenericCommand ):
 
         return [ data[x] for x in data if x == self._group ]
 
+
+
+###########################################################################################################################
+## Basic controller commands
+###########################################################################################################################
 class CreateControllerCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
@@ -196,7 +204,9 @@ class CreateControllerCommand( GenericCommand ):
             "--hostiocache", self._iocache
         ], **opt )
 
-
+###########################################################################################################################
+## Basic dock management commands
+###########################################################################################################################
 class CreateDiskCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
 
@@ -274,7 +284,9 @@ class AttachDiskCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
-
+###########################################################################################################################
+## VM basic management
+###########################################################################################################################
 class RegisterVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
@@ -314,7 +326,32 @@ class CreateVmCommand( GenericCommand ):
         ], **opt )
 
 
+class DeleteVmCommand( GenericCommand ):
 
+    def __init__( self, cfg = {}, **opt ):
+        self._cfg = cfg
+        self._validmap = {
+            pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._]+$"], "mandatory":True },
+            pyvbcc.KEY_VM_DELETE: { "match":["True", "False"] }
+
+        }
+
+        opt["strict"] = False
+        pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
+
+        self._delete = True
+        if pyvbcc.KEY_VM_DELETE in cfg : self._delete = cfg[ pyvbcc.KEY_VM_DELETE ]
+
+        del_str = ""
+        if self._delete:
+            del_str = "--delete"
+
+        super().__init__( ["VBoxManage", "unregistervm", cfg[ pyvbcc.KEY_VM_NAME ], del_str ], **opt )
+
+
+###########################################################################################################################
+## Modify VM
+###########################################################################################################################
 class ModifyVmCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
@@ -387,8 +424,8 @@ class ModifyVmCommand( GenericCommand ):
 
 class ModifyVmBootCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
-        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
-            raise AttributeError("Missing vm name and NIC id")
+        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_BOOT_ORDER not in cfg:
+            raise AttributeError("Missing vm name or boot order index")
 
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
         self._boot_order = cfg[ pyvbcc.KEY_BOOT_ORDER ]
@@ -397,7 +434,9 @@ class ModifyVmBootCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
-
+###########################################################################################################################
+## VM NIC modify
+###########################################################################################################################
 class ModifyVmNicCommand( GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
@@ -451,7 +490,9 @@ class ModifyVmNicCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
-
+###########################################################################################################################
+## NAT netwrking
+###########################################################################################################################
 class CreateNatNetworkCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_NETWORK_NAME not in cfg or pyvbcc.KEY_NETWORK_ADDR not in cfg or pyvbcc.KEY_NETWORK_CIDR not in cfg:
@@ -478,16 +519,16 @@ class CreateNatNetworkCommand( GenericCommand ):
             enable_str = "--disable"
 
         dhcp_str = "on"
-        if not self._enabled:
+        if not self._dhcp:
             dhcp_str = "off"
 
         ipv6_str = "off"
-        if self._enabled:
+        if self._ipv6:
             ipv6_str = "on"
 
-        if self._nic_genericdrv: params += list( [ enable_str ] )
-        if self._nic_genericdrv: params += list( [ "--dhcp", dhcp_str ] )
-        if self._nic_genericdrv: params += list( [ "--ipv6", ipv6_str ] )
+        if self._enabled: params += list( [ enable_str ] )
+        if self._dhcp: params += list( [ "--dhcp", dhcp_str ] )
+        if self._dhcp: params += list( [ "--ipv6", ipv6_str ] )
 
         super().__init__( params, **opt )
 
@@ -499,7 +540,34 @@ class ModifyNatNetworkCommand( GenericCommand ):
 
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        params = ["VBoxManage", "natnetwork", "modify", self._nat_name ]
+
+        self._enabled = None
+        self._dhcp = None
+        self._ipv6 = None
+        self._network = None
+        self._cidr = "24"
+
+        params = ["VBoxManage", "natnetwork", "modify", "--netname", self._nat_name ]
+
+        if pyvbcc.KEY_NETWORK_ENABLED in cfg: self._enabled = cfg[ pyvbcc.KEY_NETWORK_ENABLED ]
+        if pyvbcc.KEY_NETWORK_IPV6 in cfg: self._ipv6 = cfg[ pyvbcc.KEY_NETWORK_IPV6 ]
+        if pyvbcc.KEY_NETWORK_DHCP in cfg: self._dhcp = cfg[ pyvbcc.KEY_NETWORK_DHCP ]
+        if pyvbcc.KEY_NETWORK_ADDR in cfg: self._enabled = cfg[ pyvbcc.KEY_NETWORK_ADDR ]
+        if pyvbcc.KEY_NETWORK_CIDR in cfg: self._ipv6 = cfg[ pyvbcc.KEY_NETWORK_CIDR ]
+
+        enable_str = "--enable"
+        if not self._enabled: enable_str = "--disable"
+
+        dhcp_str = "on"
+        if not self._dhcp: dhcp_str = "off"
+
+        ipv6_str = "off"
+        if self._ipv6: ipv6_str = "on"
+
+        if self._enabled: params += list( [ enable_str ] )
+        if self._dhcp: params += list( [ "--dhcp", dhcp_str ] )
+        if self._ipv6: params += list( [ "--ipv6", ipv6_str ] )
+        if self._network: params += list( [ "--network", "%s/%s" % (self._network, self._cidr) ] )
 
         super().__init__( params, **opt )
 
@@ -510,11 +578,17 @@ class DeleteNatNetworkCommand( GenericCommand ):
 
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        params = ["VBoxManage", "natnetwork", remove, self._nat_name ]
+        params = ["VBoxManage", "natnetwork", "remove", self._nat_name ]
 
         super().__init__( params, **opt )
 
 
+
+
+
+###########################################################################################################################
+## HostOnly netwrking
+###########################################################################################################################
 class ModifyVmHostOnlyNicCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
@@ -527,6 +601,12 @@ class ModifyVmHostOnlyNicCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
+
+
+
+###########################################################################################################################
+## IntNet netwrking
+###########################################################################################################################
 class ModifyVmIntNetNicCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
@@ -538,21 +618,6 @@ class ModifyVmIntNetNicCommand( GenericCommand ):
         params = ["VBoxManage", "modifyvm", self._vm ]
 
         super().__init__( params, **opt )
-
-class DeleteVmCommand( GenericCommand ):
-
-    def __init__( self, cfg = {}, **opt ):
-        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        self._delete = True
-
-        if pyvbcc.KEY_VM_DELETE in cfg and cfg[ pyvbcc.KEY_VM_DELETE ] in (True, False):
-            self._delete = cfg[ pyvbcc.KEY_VM_DELETE ]
-
-        del_str = ""
-        if self._delete:
-            del_str = "--delete"
-
-        super().__init__( ["VBoxManage", "unregistervm", self._vm, del_str ], **opt )
 
 
 
@@ -587,6 +652,6 @@ if __name__ == "__main__":
     else:
         print("Install ISO %s was not found ... skipping" % ( dvdfile ) )
 
-    time.sleep(60)
+    time.sleep(5)
     cli = DeleteVmCommand( vm1 ).run()
     pass

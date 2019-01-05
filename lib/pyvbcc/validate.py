@@ -19,6 +19,10 @@ class Validator( object ):
         if not type( valmap ).__name__ == "dict":
             raise AttributeError( "Bad validator map given. Must be dict.")
 
+        self._strict = True
+        if "strict" in opt and opt["strict"] in (True,False):
+            self._strict = opt["strict"]
+
         self._map = valmap
         self._mandatory = [ k for k in self._map if 'mandatory' in self._map[k] and self._map[k]['mandatory'] == True ]
 
@@ -55,24 +59,23 @@ class Validator( object ):
         results = dict()
         if not type( valdata ).__name__ == "dict": raise AttributeError( "Validate input must be of type dict.")
 
-        pprint( self._mandatory )
-
         for m in self._mandatory:
             if m not in valdata: raise AttributeError("Missing mandatory key %s" % ( m ) )
 
         for v in valdata:
-            if v not in self._map: raise AttributeError( "Input ley %s not in validator map" % ( v ) )
+            if self._strict and v not in self._map: raise AttributeError( "Input key %s not in validator map" % ( v ) )
 
             rxtype = None
-            if 'search' in self._map[ v ]: rxtype = "search"
-            if 'match' in self._map[ v ]: rxtype = "match"
+            if v in self._map:
+                if 'search' in self._map[ v ]: rxtype = "search"
+                if 'match' in self._map[ v ]: rxtype = "match"
 
-            if 'match_all' in self._map[ v ] and self._map[ v ]['match_all'] == True:
-                results[v] = self._all_pattern( rxtype, v, valdata[v] )
-            else:
-                results[v] = self._any_pattern( rxtype, v, valdata[v] )
+            if v in self._map:
+                if 'match_all' in self._map[ v ] and self._map[ v ]['match_all'] == True:
+                    results[v] = self._all_pattern( rxtype, v, valdata[v] )
+                else:
+                    results[v] = self._any_pattern( rxtype, v, valdata[v] )
 
-        pprint( results )
         falses = [ x for x in results if results[x] == False ]
         if len( falses ) > 0 :
             raise RuntimeError( "Validation failed for keys: %s" % ( ",".join( falses )) )
