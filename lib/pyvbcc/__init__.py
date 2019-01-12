@@ -34,7 +34,9 @@ KEY_VM_KEYBOARD="vm.keyboard"
 KEY_VM_MOUSE="vm.mouse"
 KEY_VM_DELETE="vm.delete"
 KEY_VM_REGISTER="vm.register"
-
+KEY_VM_PSTATE="vm.powerstate"
+KEY_VM_STYPE="vm.starttype"
+KEY_VM_SENV="vm.startenv"
 ##
 KEY_BOOT_ORDER="boot.order"
 KEY_BOOT_DEVICE="boot.device"

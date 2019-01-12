@@ -14,7 +14,9 @@ class GenericCommand( object ):
     def __init__(self, cmd, **opt ):
         self._cmd = cmd
         self._debug = False
-        
+        self._command = "VBoxManage"
+
+
         if pyvbcc.KEY_SYSTEM_DEBUG in opt and opt[ pyvbcc.KEY_SYSTEM_DEBUG ] in (True,False):
             self._debug = opt[ pyvbcc.KEY_SYSTEM_DEBUG ]
 
@@ -22,8 +24,11 @@ class GenericCommand( object ):
         result = list()
         cmd = self._cmd
 
+
         if type( cmd ).__name__ == "str":
             cmd = shlex.split( cmd )
+
+        cmd = [ self._command ] + cmd
 
         if self._debug: print( " ".join( cmd ) )
 
@@ -37,7 +42,7 @@ class GenericCommand( object ):
 ###########################################################################################################################
 class ListVmsCommand( GenericCommand ):
     def __init__( self, **opt ):
-        super().__init__( ["VBoxManage", "list", "vms", "--sorted"], **opt )
+        super().__init__( [ "list", "vms", "--sorted"], **opt )
 
     def run( self ):
         data = dict()
@@ -49,7 +54,7 @@ class ListVmsCommand( GenericCommand ):
 
 class InfoVmCommand( GenericCommand ):
     def __init__( self, vm, **opt ):
-        super().__init__( ["VBoxManage", "showvminfo", "--machinereadable",vm ], **opt )
+        super().__init__( [ "showvminfo", "--machinereadable",vm ], **opt )
 
     def run( self ):
         data = dict()
@@ -63,7 +68,7 @@ class InfoVmCommand( GenericCommand ):
 
 class ListNetworkCommand( GenericCommand ):
     def __init__( self, mode, net = None, **opt ):
-        super().__init__( ["VBoxManage", "list", mode ], **opt )
+        super().__init__( [ "list", mode ], **opt )
         self._net = net
         self._mode = mode
 
@@ -99,7 +104,7 @@ class ListNetworkCommand( GenericCommand ):
 
 class ListDiskCommand( GenericCommand ):
     def __init__( self, vm = None, **opt ):
-        super().__init__( ["VBoxManage", "list", "hdds", "--long" ], **opt )
+        super().__init__( [ "list", "hdds", "--long" ], **opt )
         self._vm = vm
 
     def run( self ):
@@ -134,7 +139,7 @@ class ListDiskCommand( GenericCommand ):
 
 class ListSystemPropertiesCommand( GenericCommand ):
     def __init__( self, vm = None, **opt ):
-        super().__init__( ["VBoxManage", "list", "systemproperties", "--long" ], **opt )
+        super().__init__( [ "list", "systemproperties", "--long" ], **opt )
         self._vm = vm
 
     def run( self ):
@@ -154,7 +159,7 @@ class ListSystemPropertiesCommand( GenericCommand ):
 
 class ListGroupCommand( GenericCommand ):
     def __init__( self, group, **opt ):
-        super().__init__( ["VBoxManage", "list", "groups", "--long" ], **opt )
+        super().__init__( [ "list", "groups", "--long" ], **opt )
         self._group = group
 
     def run( self ):
@@ -210,7 +215,7 @@ class CreateControllerCommand( GenericCommand ):
         if pyvbcc.KEY_CONTROLLER_BOOTABLE in self._cfg:
             self._bootable = self._cfg[ pyvbcc.KEY_CONTROLLER_BOOTABLE ]
 
-        super().__init__( ["VBoxManage",
+        super().__init__( [
             "storagectl", self._vm,
             "--add", self._type,
             "--controller", self._chipset,
@@ -242,7 +247,7 @@ class CreateDiskCommand( GenericCommand ):
         if pyvbcc.KEY_DISKS_FORMAT in self._cfg :
             self._format = self._cfg[ pyvbcc.KEY_DISKS_FORMAT ]
 
-        super().__init__( ["VBoxManage",
+        super().__init__( [
             "createmedium", "disk",
             "--filename", self._filename,
             "--format", self._format,
@@ -271,7 +276,7 @@ class CloseDiskCommand( GenericCommand ):
         if self._delete:
             del_str = "--delete"
 
-        super().__init__( ["VBoxManage",
+        super().__init__( [
             "closemdium", "disk", self._cfg[ pyvbcc.KEY_DISKS_FILE ],
             del_str
         ], **opt )
@@ -299,7 +304,7 @@ class AttachDiskCommand( GenericCommand ):
         if pyvbcc.KEY_DISKS_TYPE not in self._cfg: self._cfg[ pyvbcc.KEY_DISKS_TYPE ] = "hdd"
         if pyvbcc.KEY_DISKS_DEVICE not in self._cfg: self._cfg[ pyvbcc.KEY_DISKS_DEVICE ] = "0"
 
-        params = ["VBoxManage",
+        params = [
             "storageattach", self._cfg[ pyvbcc.KEY_VM_NAME ],
             "--storagectl", self._cfg[ pyvbcc.KEY_CONTROLLER_NAME ],
             "--medium", self._cfg[ pyvbcc.KEY_DISKS_FILE ]
@@ -330,7 +335,7 @@ class RegisterVmCommand( GenericCommand ):
         if not os.path.exists( self._cfg[ pyvbcc.KEY_DISKS_FILE ] ):
             raise RuntimeError("Missing VM disk in registration")
 
-        super().__init__( ["VBoxManage",
+        super().__init__( [
             "registervm", self._cfg[ pyvbcc.KEY_DISKS_FILE ]
         ], **opt )
 
@@ -355,7 +360,7 @@ class CreateVmCommand( GenericCommand ):
         reg_str = ""
         if self._register: reg_str = "--register"
 
-        super().__init__( ["VBoxManage",
+        super().__init__( [
             "createvm",
             "--name", self._cfg[ pyvbcc.KEY_VM_NAME ],
             "--groups", "/%s" % (  self._cfg[ pyvbcc.KEY_GROUP_NAME ] ),
@@ -384,7 +389,7 @@ class DeleteVmCommand( GenericCommand ):
         if self._delete:
             del_str = "--delete"
 
-        super().__init__( ["VBoxManage", "unregistervm", self._cfg[ pyvbcc.KEY_VM_NAME ], del_str ], **opt )
+        super().__init__( [ "unregistervm", self._cfg[ pyvbcc.KEY_VM_NAME ], del_str ], **opt )
 
 
 ###########################################################################################################################
@@ -436,7 +441,7 @@ class ModifyVmCommand( GenericCommand ):
         if pyvbcc.KEY_VM_KEYBOARD in cfg: self._keyboard = cfg[ pyvbcc.KEY_VM_KEYBOARD ]
         if pyvbcc.KEY_VM_MOUSE in cfg: self._mouse = cfg[ pyvbcc.KEY_VM_MOUSE ]
 
-        params = ["VBoxManage", "modifyvm", self._vm ]
+        params = [ "modifyvm", self._vm ]
 
         if self._ostype: params += list( [ "--ostype", self._ostype ] )
         if self._group: params += list( [ "--groups", self._group ] )
@@ -468,7 +473,7 @@ class ModifyVmBootCommand( GenericCommand ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
         self._boot_order = cfg[ pyvbcc.KEY_BOOT_ORDER ]
 
-        params = ["VBoxManage", "modifyvm", self._vm ]
+        params = [ "modifyvm", self._vm ]
 
         super().__init__( params, **opt )
 
@@ -511,7 +516,7 @@ class ModifyVmNicCommand( GenericCommand ):
         if pyvbcc.KEY_NIC_BANDWIDTH_GROUP in cfg: self._nic_bandwidth_group = cfg[ pyvbcc.KEY_NIC_BANDWIDTH_GROUP ]
         if pyvbcc.KEY_NIC_GENERICDRV in cfg: self._nic_genericdrv = cfg[ pyvbcc.KEY_NIC_GENERICDRV ]
 
-        params = ["VBoxManage", "modifyvm", self._vm ]
+        params = [ "modifyvm", self._vm ]
         if self._nic_net: params += list( [ "--nic%s" % (self._nic_id), self._nic_net ] )
         if self._nic_mac: params += list( [ "--macaddress%s" % (self._nic_id), self._nic_mac ] )
         if self._nic_connected: params += list( [ "--cableconnected%s" % (self._nic_id), self._nic_connected ] )
@@ -543,7 +548,7 @@ class CreateNatNetworkCommand( GenericCommand ):
         self._cidr = cfg[ pyvbcc.KEY_NETWORK_CIDR ]
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        params = ["VBoxManage", "natnetwork", "add",
+        params = [ "natnetwork", "add",
             "--netname", self._nat_name,
             "--network", "%s/%s" % (self._network, self._cidr)
         ]
@@ -585,7 +590,7 @@ class ModifyNatNetworkCommand( GenericCommand ):
         self._network = None
         self._cidr = "24"
 
-        params = ["VBoxManage", "natnetwork", "modify", "--netname", self._nat_name ]
+        params = [ "natnetwork", "modify", "--netname", self._nat_name ]
 
         if pyvbcc.KEY_NETWORK_ENABLED in cfg: self._enabled = cfg[ pyvbcc.KEY_NETWORK_ENABLED ]
         if pyvbcc.KEY_NETWORK_IPV6 in cfg: self._ipv6 = cfg[ pyvbcc.KEY_NETWORK_IPV6 ]
@@ -616,7 +621,7 @@ class DeleteNatNetworkCommand( GenericCommand ):
 
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        params = ["VBoxManage", "natnetwork", "remove", self._nat_name ]
+        params = [ "natnetwork", "remove", self._nat_name ]
 
         super().__init__( params, **opt )
 
@@ -635,7 +640,7 @@ class ModifyVmHostOnlyNicCommand( GenericCommand ):
         self._net_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
         self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
 
-        params = ["VBoxManage", "modifyvm", self._vm ]
+        params = [ "modifyvm", self._vm ]
 
         super().__init__( params, **opt )
 
@@ -653,11 +658,27 @@ class ModifyVmIntNetNicCommand( GenericCommand ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
         self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
 
-        params = ["VBoxManage", "modifyvm", self._vm ]
+        params = [ "modifyvm", self._vm ]
 
         super().__init__( params, **opt )
 
 
+###########################################################################################################################
+## Power manage
+###########################################################################################################################
+class ModifyVmStartCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg:
+            raise AttributeError("Missing vm name")
+
+        self._type = "headless"
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        if pyvbcc.KEY_VM_STYPE in cfg: self._type = cfg[ pyvbcc.KEY_VM_STYPE ]
+        if pyvbcc.KEY_VM_SENV in cfg: self._startenv = cfg[ pyvbcc.KEY_VM_SENV ]
+
+        params = [ "startvm", self._vm, "--type", self._type ]
+
+        super().__init__( params, **opt )
 
 
 if __name__ == "__main__":
@@ -666,13 +687,15 @@ if __name__ == "__main__":
     info = ListSystemPropertiesCommand().run()
     home = pyvbcc.utils.read_env("HOME")
 
+    pprint( info )
+
     vm = "vm2"
     group = "test1"
     vmdir = "%s/%s/%s" % ( info["defaultmachinefolder"], group, vm )
     vmfile = "%s/%s.vmdk" % ( vmdir, vm )
     dvdfile = "%s/Downloads/CentOS-7-x86_64-NetInstall-1810.iso" % ( home )
 
-    vm1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64", pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_VM_MOUSE: "ps2", pyvbcc.KEY_VM_MEMORY: "512", pyvbcc.KEY_VM_AUDIO: "null", pyvbcc.KEY_VM_USB: "off", pyvbcc.KEY_VM_CPUCAP: "50", pyvbcc.KEY_VM_CPUS:"1" }
+    vm1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_VM_STYPE: "gui" ,pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64", pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_VM_MOUSE: "ps2", pyvbcc.KEY_VM_MEMORY: "512", pyvbcc.KEY_VM_AUDIO: "null", pyvbcc.KEY_VM_USB: "off", pyvbcc.KEY_VM_CPUCAP: "50", pyvbcc.KEY_VM_CPUS:"1" }
     ctl0 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_CONTROLLER_TYPE: "ide", pyvbcc.KEY_CONTROLLER_PCOUNT: "2", pyvbcc.KEY_CONTROLLER_CHIPSET: "PIIX4", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on"}
     ctl1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_CONTROLLER_TYPE: "sas", pyvbcc.KEY_CONTROLLER_CHIPSET: "LSILogicSAS", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
     dks0 = { pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_DISKS_FORMAT:"vmdk", pyvbcc.KEY_DISKS_NAME:"dm1-disk", pyvbcc.KEY_DISKS_SIZE: "4096"}
@@ -685,11 +708,14 @@ if __name__ == "__main__":
     cli = CreateControllerCommand( ctl1 ).run()
     cli = CreateDiskCommand( dks0 ).run()
     cli = AttachDiskCommand( atts0 ).run()
+
     if os.path.exists( dvdfile ):
         cli = AttachDiskCommand( atts1 ).run()
     else:
         print("Install ISO %s was not found ... skipping" % ( dvdfile ) )
 
-    time.sleep(10)
+    cli = ModifyVmStartCommand( vm1 ).run()
+
+    time.sleep(60)
     cli = DeleteVmCommand( vm1 ).run()
     pass
