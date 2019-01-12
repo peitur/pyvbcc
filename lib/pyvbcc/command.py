@@ -680,6 +680,26 @@ class ModifyVmStartCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
+###########################################################################################################################
+## Power manage
+###########################################################################################################################
+class ModifyVmPowerOffCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg:
+            raise AttributeError("Missing vm name")
+
+        self._type = "poweroff"
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        if pyvbcc.KEY_VM_OFFTYPE in cfg and cfg[ pyvbcc.KEY_VM_OFFTYPE] in ("hard", "soft"):
+            if cfg[ pyvbcc.KEY_VM_OFFTYPE] == "hard":
+                self._type = "poweroff"
+            elif cfg[ pyvbcc.KEY_VM_OFFTYPE] == "soft":
+                self._type = "acpipowerbutton"
+
+        params = [ "controlvm", self._vm, self._type ]
+
+        super().__init__( params, **opt )
+
 
 if __name__ == "__main__":
     import time
@@ -695,7 +715,7 @@ if __name__ == "__main__":
     vmfile = "%s/%s.vmdk" % ( vmdir, vm )
     dvdfile = "%s/Downloads/CentOS-7-x86_64-NetInstall-1810.iso" % ( home )
 
-    vm1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_VM_STYPE: "gui" ,pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64", pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_VM_MOUSE: "ps2", pyvbcc.KEY_VM_MEMORY: "512", pyvbcc.KEY_VM_AUDIO: "null", pyvbcc.KEY_VM_USB: "off", pyvbcc.KEY_VM_CPUCAP: "50", pyvbcc.KEY_VM_CPUS:"1" }
+    vm1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_VM_OFFTYPE: "hard", pyvbcc.KEY_VM_STYPE: "gui" ,pyvbcc.KEY_GROUP_NAME: "test1", pyvbcc.KEY_VM_OSTYPE: "RedHat_64", pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_VM_MOUSE: "ps2", pyvbcc.KEY_VM_MEMORY: "512", pyvbcc.KEY_VM_AUDIO: "null", pyvbcc.KEY_VM_USB: "off", pyvbcc.KEY_VM_CPUCAP: "50", pyvbcc.KEY_VM_CPUS:"1" }
     ctl0 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_CONTROLLER_TYPE: "ide", pyvbcc.KEY_CONTROLLER_PCOUNT: "2", pyvbcc.KEY_CONTROLLER_CHIPSET: "PIIX4", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on"}
     ctl1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_CONTROLLER_TYPE: "sas", pyvbcc.KEY_CONTROLLER_CHIPSET: "LSILogicSAS", pyvbcc.KEY_CONTROLLER_BOOTABLE: "on" }
     dks0 = { pyvbcc.KEY_DISKS_FILE: vmfile, pyvbcc.KEY_DISKS_FORMAT:"vmdk", pyvbcc.KEY_DISKS_NAME:"dm1-disk", pyvbcc.KEY_DISKS_SIZE: "4096"}
@@ -716,6 +736,10 @@ if __name__ == "__main__":
 
     cli = ModifyVmStartCommand( vm1 ).run()
 
-    time.sleep(60)
+    time.sleep(10)
+    print("power")
+    cli = ModifyVmPowerOffCommand( vm1 ).run()
+    time.sleep(5)
+    print("off")
     cli = DeleteVmCommand( vm1 ).run()
     pass
