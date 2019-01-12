@@ -35,14 +35,24 @@ class Validator( object ):
         matches = 0
         patterns = self._map[key][ rxtype ]
 
-        if not type( data ).__name__ == "str":
+        if type( data ).__name__ != "str":
             data = str( data )
 
+        if type( patterns ).__name__ == "str":
+            patterns = [ patterns ]
+
         for p in patterns:
+            rx = re.compile( p )
             if rxtype == "match":
-                if re.match( p, data ): matches += 1
+                m = rx.match( data )
+                if m:
+                    matches += 1
+
             if rxtype == "search":
-                if re.search( p, data ): matches += 1
+                m = rx.search( data )
+                if m:
+                    matches += 1
+
         return matches
 
     def _all_pattern( self, rxtype, key, data, **opt ):
@@ -58,7 +68,7 @@ class Validator( object ):
         matches = self._matches( rxtype, key, data )
         if matches > 0:
             return True
-            
+
         print(">> %s %s" % ( key, data ) )
         return False
 
