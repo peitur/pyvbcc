@@ -20,6 +20,10 @@ class GenericCommand( object ):
         if pyvbcc.KEY_SYSTEM_DEBUG in opt and opt[ pyvbcc.KEY_SYSTEM_DEBUG ] in (True,False):
             self._debug = opt[ pyvbcc.KEY_SYSTEM_DEBUG ]
 
+        if pyvbcc.KEY_SYSTEM_COMMAND in opt and opt[ pyvbcc.KEY_SYSTEM_COMMAND ] in ("VBoxManage", "VBoxHeadless"):
+            self._command = opt[ pyvbcc.KEY_SYSTEM_COMMAND ]
+
+
     def run( self, **opt ):
         result = list()
         cmd = self._cmd
