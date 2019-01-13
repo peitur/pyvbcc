@@ -743,7 +743,16 @@ if __name__ == "__main__":
     time.sleep(10)
     print("power")
     cli = ModifyVmPowerOffCommand( vm1 ).run()
+
+    state = InfoVmCommand( vm1[pyvbcc.KEY_VM_NAME] ).run()['VMState']
+    print("Waiting for shutdown %s - %s" % ( vm1[pyvbcc.KEY_VM_NAME], state ) )
+    while state != "poweroff":
+        print("Waiting for shutdown %s - %s" % ( vm1[pyvbcc.KEY_VM_NAME], state ) )
+        state = InfoVmCommand( vm1[pyvbcc.KEY_VM_NAME] ).run()['VMState']
+        time.sleep(1)
+
     time.sleep(5)
+
     print("off")
     cli = DeleteVmCommand( vm1 ).run()
     pass
