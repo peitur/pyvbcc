@@ -629,6 +629,27 @@ class DeleteNatNetworkCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
+class StartNatNetworkCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_NETWORK_NAME not in cfg:
+            raise AttributeError("Missing nat network name")
+
+        self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
+
+        params = [ "natnetwork", "start", "--netname", self._nat_name ]
+
+        super().__init__( params, **opt )
+
+class StopNatNetworkCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_NETWORK_NAME not in cfg:
+            raise AttributeError("Missing nat network name")
+
+        self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
+
+        params = [ "natnetwork", "stop", "--natname", self._nat_name ]
+
+        super().__init__( params, **opt )
 
 
 
@@ -636,18 +657,27 @@ class DeleteNatNetworkCommand( GenericCommand ):
 ###########################################################################################################################
 ## HostOnly netwrking
 ###########################################################################################################################
-class ModifyVmHostOnlyNicCommand( GenericCommand ):
+class CreateHostOnlyNetworkCommand( GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
             raise AttributeError("Missing vm name and NIC id")
 
         self._net_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
-        self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
 
-        params = [ "modifyvm", self._vm ]
+        params = [ "hostonlyif", "create", self._vm ]
 
         super().__init__( params, **opt )
 
+class DeleteHostOnlyNetworkCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
+            raise AttributeError("Missing vm name and NIC id")
+
+        self._net_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
+
+        params = [ "hostonlyif", "remove",self._vm ]
+
+        super().__init__( params, **opt )
 
 
 
