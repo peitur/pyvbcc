@@ -548,18 +548,20 @@ class CreateNatNetworkCommand( GenericCommand ):
         self._enabled = True
         self._dhcp = True
         self._ipv6 = False
+        self._cidr = "24"
+
         self._network = cfg[ pyvbcc.KEY_NETWORK_ADDR ]
-        self._cidr = cfg[ pyvbcc.KEY_NETWORK_CIDR ]
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
+
+        if pyvbcc.KEY_NETWORK_CIDR in cfg: self._cidr = cfg[ pyvbcc.KEY_NETWORK_CIDR ]
+        if pyvbcc.KEY_NETWORK_ENABLED in cfg: self._enabled = cfg[ pyvbcc.KEY_NETWORK_ENABLED ]
+        if pyvbcc.KEY_NETWORK_IPV6 in cfg: self._ipv6 = cfg[ pyvbcc.KEY_NETWORK_IPV6 ]
+        if pyvbcc.KEY_NETWORK_DHCP in cfg: self._dhcp = cfg[ pyvbcc.KEY_NETWORK_DHCP ]
 
         params = [ "natnetwork", "add",
             "--netname", self._nat_name,
             "--network", "%s/%s" % (self._network, self._cidr)
         ]
-
-        if pyvbcc.KEY_NETWORK_ENABLED in cfg: self._enabled = cfg[ pyvbcc.KEY_NETWORK_ENABLED ]
-        if pyvbcc.KEY_NETWORK_IPV6 in cfg: self._ipv6 = cfg[ pyvbcc.KEY_NETWORK_IPV6 ]
-        if pyvbcc.KEY_NETWORK_DHCP in cfg: self._dhcp = cfg[ pyvbcc.KEY_NETWORK_DHCP ]
 
         enable_str = "--enable"
         if not self._enabled:
@@ -625,7 +627,7 @@ class DeleteNatNetworkCommand( GenericCommand ):
 
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        params = [ "natnetwork", "remove", self._nat_name ]
+        params = [ "natnetwork", "remove", "--netname", self._nat_name ]
 
         super().__init__( params, **opt )
 
@@ -756,12 +758,16 @@ if __name__ == "__main__":
     atts0 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "SAS", pyvbcc.KEY_DISKS_FILE: vmfile }
     atts1 = { pyvbcc.KEY_VM_NAME: vm, pyvbcc.KEY_CONTROLLER_NAME: "IDE", pyvbcc.KEY_DISKS_FILE: dvdfile, pyvbcc.KEY_DISKS_TYPE: "dvddrive" }
 
+    nat1 = { pyvbcc.KEY_NETWORK_NAME: "nat%s" % ( vm1[pyvbcc.KEY_GROUP_NAME] ), pyvbcc.KEY_NETWORK_ADDR: "192.168.101.0", pyvbcc.KEY_NETWORK_CIDR: "24", pyvbcc.KEY_NETWORK_DHCP: True }
+
     cli = CreateVmCommand( vm1 ).run()
     cli = ModifyVmCommand( vm1 ).run()
     cli = CreateControllerCommand( ctl0 ).run()
     cli = CreateControllerCommand( ctl1 ).run()
     cli = CreateDiskCommand( dks0 ).run()
     cli = AttachDiskCommand( atts0 ).run()
+
+    cli = CreateNatNetworkCommand( nat1 ).run()
 
     if os.path.exists( dvdfile ):
         cli = AttachDiskCommand( atts1 ).run()
@@ -782,6 +788,8 @@ if __name__ == "__main__":
         time.sleep(1)
 
     time.sleep(5)
+
+    cli = DeleteNatNetworkCommand( nat1 ).run()
 
     print("off")
     cli = DeleteVmCommand( vm1 ).run()

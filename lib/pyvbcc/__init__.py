@@ -69,9 +69,9 @@ KEY_DISKS_DELETE="disk.delete"
 KEY_NETWORK_NAME="network.name"
 KEY_NETWORK_ADDR="network.address"
 KEY_NETWORK_CIDR="network.cidr"
-KEY_NETWORK_ENABLED="network.name"
-KEY_NETWORK_DHCP="network.name"
-KEY_NETWORK_IPV6="network.name"
+KEY_NETWORK_DHCP="network.dhcp"
+KEY_NETWORK_IPV6="network.ipv6"
+KEY_NETWORK_ENABLED="network.enabled"
 
 
 
