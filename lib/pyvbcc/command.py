@@ -666,7 +666,7 @@ class CreateHostOnlyNetworkCommand( GenericCommand ):
 
         self._net_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        params = [ "hostonlyif", "create", self._vm ]
+        params = [ "hostonlyif","ipconfig", "create", self._vm ]
 
         super().__init__( params, **opt )
 
