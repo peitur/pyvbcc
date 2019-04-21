@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import os, sys, re
+sys.path.append( ".")
+sys.path.append( ".." )
+
 import getopt
 import traceback
 
@@ -10,6 +13,7 @@ from pprint import pprint
 import pyvbcc
 import pyvbcc.config
 import pyvbcc.cli
+
 
 ##########################################################
 ## Defaults

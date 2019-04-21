@@ -46,14 +46,16 @@ class HelpCommandLine( CommonCommandLine ):
 
 class InfoCommandLine( CommonCommandLine ):
     def __init__(self, argv, **opt ):
-        super().__init__( argv, ["v:","n:","d:","g:"], ["vm=","network=","dhcp=","group=","vm-disk="], **opt )
+        super().__init__( argv, ["v:","n:","d","g:"], ["debug","vm=","network=","dhcp=","group=","vm-disk="], **opt )
 
         self._validmap = {
             pyvbcc.KEY_VM_NAME :{ "match":["^[a-zA-Z0-9\-\._]+$"] },
             pyvbcc.KEY_NETWORK_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
             pyvbcc.KEY_DHCP_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
-            pyvbcc.KEY_DISKS_VM_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
-            pyvbcc.KEY_GROUP_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] }
+            pyvbcc.KEY_DISKS_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
+            pyvbcc.KEY_GROUP_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
+            pyvbcc.KEY_SYSTEM_DEBUG : {"match":[".*"]},
+            pyvbcc.KEY_SYSTEM_HELP : {"match":[".*"]}
         }
 
         self._validator = pyvbcc.validate.Validator( self._validmap, **opt )
@@ -74,7 +76,7 @@ class InfoCommandLine( CommonCommandLine ):
             elif o in ("-g", "--group"):
                 self._opt[ pyvbcc.KEY_GROUP_NAME ] = a
             elif o in ("--vm-disk"):
-                self._opt[ pyvbcc.KEY_DISKS_VM_NAME ] = a
+                self._opt[ pyvbcc.KEY_DISKS_NAME ] = a
 
         ## Either this is true, or get exception
         self._validator.validate( self._opt )
@@ -96,8 +98,9 @@ class InfoCommandLine( CommonCommandLine ):
             for t in ["intnets", "bridgedifs", "hostonlyifs", "natnets"]:
                 allnets[ t ] = pyvbcc.command.ListNetworkCommand( t, self._opt[ pyvbcc.KEY_NETWORK_NAME ] ).run()
             pprint( allnets )
-        if pyvbcc.KEY_DISKS_VM_NAME in self._opt:
-            res = pyvbcc.command.ListDiskCommand( self._opt[ pyvbcc.KEY_DISKS_VM_NAME ] ).run()
+            
+        if pyvbcc.KEY_DISKS_NAME in self._opt:
+            res = pyvbcc.command.ListDiskCommand( self._opt[ pyvbcc.KEY_DISKS_NAME ] ).run()
             pprint( res )
 
         if pyvbcc.KEY_GROUP_NAME in self._opt:
