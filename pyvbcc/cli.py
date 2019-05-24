@@ -11,6 +11,9 @@ import pyvbcc.config
 import pyvbcc.validate
 import pyvbcc.command
 
+import pyvbcc.info
+
+
 class CommonCommandLine( object ):
     def __init__( self, argv, shrt=[], lng=[], **opt ):
         self._debug = False
