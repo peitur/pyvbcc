@@ -23,6 +23,20 @@ def GetVmInfo( opt ):
         res = pyvbcc.info.commands.InfoVmCommand( opt[ pyvbcc.KEY_VM_NAME ] ).run()
     return res
 
+def GetGroupInfo( opt ):
+    return pyvbcc.info.commands.ListGroupCommand( opt[ pyvbcc.KEY_GROUP_NAME ] ).run()
+
+def GetDiskInfo( opt ):
+    return pyvbcc.info.commands.ListDiskCommand( opt[ pyvbcc.KEY_DISKS_NAME ] ).run()
+
+def GetNetworkInfo( opt ):
+    allnets = dict()
+    for t in ["intnets", "bridgedifs", "hostonlyifs", "natnets"]:
+        allnets[ t ] = pyvbcc.info.commands.ListNetworkCommand( t, opt[ pyvbcc.KEY_NETWORK_NAME ] ).run()
+    return allnets
+
+def GetSystemInfo( opt ):
+    return pyvbcc.info.commands.ListSystemPropertiesCommand( self._opt )
 
 if __name__ == "__main__":
     pass

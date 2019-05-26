@@ -2,6 +2,7 @@
 
 import os, sys, re
 import subprocess, shlex
+import getopt
 
 import pyvbcc
 import pyvbcc.utils
@@ -40,6 +41,35 @@ class GenericCommand( object ):
         for line in prc.stdout.readlines():
             result.append( line.lstrip().rstrip() )
         return result
+
+
+class CommonCommandLine( object ):
+    def __init__( self, argv, shrt=[], lng=[], **opt ):
+        self._debug = False
+        self._argv = argv
+        self._short = ["hDc:"]+shrt
+        self._long = ["help","debug", "config="]+lng
+        self._opt = dict()
+        self._opts = None
+        self._args = None
+        self._validator = None
+
+        if 'debug' in opt and opt['debug'] in (True, False):
+            self._debug = opt['debug']
+
+        try:
+            self._opts, self._args = getopt.getopt( self._argv[1:], "".join( self._short ), self._long )
+        except getopt.GetoptError as err:
+            raise err
+
+    def get( self, key ):
+        if key in self._opt:
+            return self._opt[ key ]
+        return None
+
+    def parse(self): pass
+
+    def action( self ): pass
 
 
 ###########################################################################################################################
@@ -652,3 +682,4 @@ if __name__ == "__main__":
     print("off")
     cli = DeleteVmCommand( vm1 ).run()
     pass
+    

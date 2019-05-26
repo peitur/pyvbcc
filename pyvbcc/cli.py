@@ -14,40 +14,13 @@ import pyvbcc.command
 import pyvbcc.info
 
 
-class CommonCommandLine( object ):
-    def __init__( self, argv, shrt=[], lng=[], **opt ):
-        self._debug = False
-        self._argv = argv
-        self._short = ["hDc:"]+shrt
-        self._long = ["help","debug", "config="]+lng
-        self._opt = dict()
-        self._opts = None
-        self._args = None
-        self._validator = None
 
-        if 'debug' in opt and opt['debug'] in (True, False):
-            self._debug = opt['debug']
-
-        try:
-            self._opts, self._args = getopt.getopt( self._argv[1:], "".join( self._short ), self._long )
-        except getopt.GetoptError as err:
-            raise err
-
-    def get( self, key ):
-        if key in self._opt:
-            return self._opt[ key ]
-        return None
-
-    def parse(self): pass
-
-    def action( self ): pass
-
-class HelpCommandLine( CommonCommandLine ):
+class HelpCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, [], [], **opt )
 
 
-class InfoCommandLine( CommonCommandLine ):
+class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, ["v:","n:","d","g:"], ["debug","vm=","network=","dhcp=","group=","vm-disk="], **opt )
 
@@ -104,7 +77,7 @@ class InfoCommandLine( CommonCommandLine ):
             res = pyvbcc.info.GetGroupInfo( self._opt )
             pprint( res )
 
-class CreateCommandLine( CommonCommandLine ):
+class CreateCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, ["g:"], ["group="], **opt )
         self._validmap = {
@@ -127,17 +100,17 @@ class CreateCommandLine( CommonCommandLine ):
 
         return self._opt
 
-class StartCommandLine( CommonCommandLine ):
+class StartCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, [], [], **opt )
 
 
-class StopCommandLine( CommonCommandLine ):
+class StopCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, [], [], **opt )
 
 
-class DestroyCommandLine( CommonCommandLine ):
+class DestroyCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, ["g:"], ["group="], **opt )
         self._validmap = {
@@ -160,22 +133,22 @@ class DestroyCommandLine( CommonCommandLine ):
 
         return self._opt
 
-class SshCommandLine( CommonCommandLine ):
+class SshCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, [], [], **opt )
 
 
-class ProvisionCommandLine( CommonCommandLine ):
+class ProvisionCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, [], [], **opt )
 
 
-class InsertCommandLine( CommonCommandLine ):
+class InsertCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, [], [], **opt )
 
 
-class EjectCommandLine( CommonCommandLine ):
+class EjectCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
         super().__init__( argv, [], [], **opt )
 
