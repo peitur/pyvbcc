@@ -27,7 +27,8 @@ class ListVmsCommand( pyvbcc.command.GenericCommand ):
         res = super().run()
         for r in res:
             m = re.match(r"\"(.+)\"\s+{(.+)}", r )
-            data[ m.group(1) ] = m.group(2)
+            if m.group(1) != "<inaccessible>":
+                data[ m.group(1) ] = m.group(2)
         return data
 
 class InfoVmCommand( pyvbcc.command.GenericCommand ):
