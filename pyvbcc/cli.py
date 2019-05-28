@@ -62,20 +62,16 @@ class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
 
     def action( self ):
         if pyvbcc.KEY_VM_NAME in self._opt:
-            res = pyvbcc.info.GetVmInfo( self._opt ) 
-            pprint( res )
+            return pyvbcc.info.GetVmInfo( self._opt ) 
 
         if pyvbcc.KEY_NETWORK_NAME in self._opt:
-            allnets = pyvbcc.info.GetNetworkInfo( self._opt )
-            pprint( allnets )
+            return pyvbcc.info.GetNetworkInfo( self._opt )
             
         if pyvbcc.KEY_DISKS_NAME in self._opt:
-            res = pyvbcc.info.GetDiskInfo( self._opt[ pyvbcc.KEY_DISKS_NAME ] ).run()
-            pprint( res )
+            return pyvbcc.info.GetDiskInfo( self._opt[ pyvbcc.KEY_DISKS_NAME ] ).run()
 
         if pyvbcc.KEY_GROUP_NAME in self._opt:
-            res = pyvbcc.info.GetGroupInfo( self._opt )
-            pprint( res )
+            return pyvbcc.info.GetGroupInfo( self._opt )
 
 class CreateCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
@@ -116,10 +112,7 @@ class SysInfoCommandLine( pyvbcc.command.CommonCommandLine ):
         return self._opt
 
     def action( self ):
-        res = pyvbcc.info.GetSystemInfo( self._opt )
-        pprint( res )
-
-
+        return pyvbcc.info.GetSystemInfo( self._opt )
 
 class StartCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):

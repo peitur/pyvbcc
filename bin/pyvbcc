@@ -76,8 +76,8 @@ def print_exception( e ):
 
 if __name__ == "__main__":
     opt = dict()
-
-
+    opt[ pyvbcc.KEY_SYSTEM_INFO ] = pyvbcc.info.GetSystemInfo( opt )
+    
     if len( sys.argv ) < 2:
         print_help( sys.argv[0] )
         sys.exit(1)
@@ -97,7 +97,9 @@ if __name__ == "__main__":
 
     try:
         opt = cli.parse()
-        cli.action()
+        res = cli.action()
+        if res:
+            pprint( res )
     except Exception as e:
         print_exception( e )
 
