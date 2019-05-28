@@ -33,7 +33,8 @@ SUPPORTED_MODES= {
     "stop" : {"description": "Stop VM group"},
     "destroy" : {"description": "Destroy VM group"},
     "insert": {"description":"Insert media into VM"},
-    "eject": {"description":"Eject media from VM"}
+    "eject": {"description":"Eject media from VM"},
+    "sysinfo": {"description":"System information"}
 }
 
 
@@ -91,10 +92,15 @@ if __name__ == "__main__":
     print("-----------------------------------------------------------")
     try:
         cli = pyvbcc.cli.CommandLine( opt[ pyvbcc.KEY_SYSTEM_MODE ], sys.argv[1:], **opt )
+    except Exception as e:
+        print_exception( e )
+
+    try:
         opt = cli.parse()
         cli.action()
     except Exception as e:
         print_exception( e )
+
     print("-----------------------------------------------------------")
 
     try:
