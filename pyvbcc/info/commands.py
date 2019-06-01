@@ -18,32 +18,6 @@ import pyvbcc.command
 ###########################################################################################################################
 ## Listing stuff commands
 ###########################################################################################################################
-class ListVmsCommand( pyvbcc.command.GenericCommand ):
-    def __init__( self, **opt ):
-        super().__init__( [ "list", "vms", "--sorted"], **opt )
-
-    def run( self ):
-        data = dict()
-        res = super().run()
-        for r in res:
-            m = re.match(r"\"(.+)\"\s+{(.+)}", r )
-            if m.group(1) != "<inaccessible>":
-                data[ m.group(1) ] = m.group(2)
-        return data
-
-class InfoVmCommand( pyvbcc.command.GenericCommand ):
-    def __init__( self, vm, **opt ):
-        super().__init__( [ "showvminfo", "--machinereadable",vm ], **opt )
-
-    def run( self ):
-        data = dict()
-        res = super().run()
-
-        for line in res:
-            line = re.compile( "\"" ).sub(  "", line )
-            nldata = re.split(r"=", line )
-            data[ nldata[0] ] = nldata[1]
-        return data
 
 class ListNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, mode, net = None, **opt ):
@@ -53,7 +27,7 @@ class ListNetworkCommand( pyvbcc.command.GenericCommand ):
 
     def run( self ):
         data = dict()
-        res = super().run()
+        res = super().run().result()
         item = dict()
         for line in res:
             line = re.compile( "\"" ).sub(  "", line )
@@ -88,7 +62,7 @@ class ListDiskCommand( pyvbcc.command.GenericCommand ):
 
     def run( self ):
         data = dict()
-        res = super().run()
+        res = super().run().result()
         item = dict()
         for line in res:
             line = re.compile( "\"" ).sub(  "", line )
@@ -123,7 +97,7 @@ class ListSystemPropertiesCommand( pyvbcc.command.GenericCommand ):
 
     def run( self ):
         data = dict()
-        res = super().run()
+        res = super().run().result()
         for line in res:
             line = re.compile( "\"" ).sub(  "", line )
             nldata = re.split(r":", line )
@@ -143,7 +117,7 @@ class ListGroupCommand( pyvbcc.command.GenericCommand ):
 
     def run( self ):
         data = dict()
-        res = super().run()
+        res = super().run().result()
 
         for line in res:
             line = re.compile( r"\"" ).sub(  "", line )

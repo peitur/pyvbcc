@@ -12,6 +12,7 @@ import pyvbcc.validate
 import pyvbcc.command
 
 import pyvbcc.info
+import pyvbcc.vm
 
 
 
@@ -62,7 +63,7 @@ class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
 
     def action( self ):
         if pyvbcc.KEY_VM_NAME in self._opt:
-            return pyvbcc.info.GetVmInfo( self._opt ) 
+            return pyvbcc.vm.GetVmInfo( self._opt ) 
 
         if pyvbcc.KEY_NETWORK_NAME in self._opt:
             return pyvbcc.info.GetNetworkInfo( self._opt )
