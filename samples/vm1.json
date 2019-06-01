@@ -1,0 +1,23 @@
+{
+    "system":{
+        "machinefolder":"/tmp/vms"
+    },
+    "hosts":[
+        {
+            "name":"vm1",
+            "type":"centos7",
+            "iso":"",
+            "cpus":"1",
+            "mem":"1024",
+            "disks":[
+                {"name":"vm1", "size":"8G","format":"vdi"},
+                {"name":"vm2", "size":"2G","format":"vdi"},
+                {"name":"vm3", "size":"2G","format":"vdi"}
+            ],
+            "nics":[
+                {"type":"nat","mac":"11:22:33:44:55", "network":"nat1"},
+                {"type":"host","mac":"11:22:33:44:66", "network":"vbboxnet1"}
+            ]
+        }
+    ]
+}
