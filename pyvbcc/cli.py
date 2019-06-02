@@ -13,6 +13,9 @@ import pyvbcc.command
 
 import pyvbcc.info
 import pyvbcc.vm
+import pyvbcc.disk
+import pyvbcc.net
+import pyvbcc.utils
 
 
 
