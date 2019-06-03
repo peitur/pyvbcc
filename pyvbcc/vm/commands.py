@@ -203,3 +203,27 @@ class ModifyVmBootCommand( pyvbcc.command.GenericCommand ):
         params = [ "modifyvm", self._vm ]
 
         super().__init__( params, **opt )
+
+
+
+
+###########################################################################################################################
+## Power manage
+###########################################################################################################################
+class ModifyVmPowerOffCommand( GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg:
+            raise AttributeError("Missing vm name")
+
+        self._type = "poweroff"
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        if pyvbcc.KEY_VM_OFFTYPE in cfg and cfg[ pyvbcc.KEY_VM_OFFTYPE] in ("hard", "soft"):
+            if cfg[ pyvbcc.KEY_VM_OFFTYPE] == "hard":
+                self._type = "poweroff"
+            elif cfg[ pyvbcc.KEY_VM_OFFTYPE] == "soft":
+                self._type = "acpipowerbutton"
+
+        params = [ "controlvm", self._vm, self._type ]
+
+        super().__init__( params, **opt )
+

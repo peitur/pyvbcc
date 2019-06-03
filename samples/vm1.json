@@ -9,6 +9,9 @@
             "iso":"",
             "cpus":"1",
             "mem":"1024",
+            "put":[{"source":"/etc/hosts", "target":"/etc/hosts_test"}],
+            "get":[{"source":"/var/log/messages", "target":"logs/vm1/messages"}],
+            "mount":[{"source":"tmp", "target":"/external"}],
             "disks":[
                 {"name":"vm1", "size":"8G","format":"vdi"},
                 {"name":"vm2", "size":"2G","format":"vdi"},

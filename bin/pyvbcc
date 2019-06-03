@@ -89,6 +89,8 @@ if __name__ == "__main__":
         #raise RuntimeError("Unsupported mode %s" % ( sys.argv[1] ) )
         sys.exit(3)
 
+    main_config = pyvbcc.config.Configuration( CONFIG_FILE )
+
     print("-----------------------------------------------------------")
     try:
         cli = pyvbcc.cli.CommandLine( opt[ pyvbcc.KEY_SYSTEM_MODE ], sys.argv[1:], **opt )

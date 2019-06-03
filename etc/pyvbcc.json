@@ -6,6 +6,6 @@
 		"path":"/usr/local/bin/VBoxManage"
 	},
 	"config":{
-		"path":"test/groups.d"
+		"path":"samples/vm1.json"
 	}
 }

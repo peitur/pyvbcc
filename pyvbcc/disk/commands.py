@@ -24,8 +24,7 @@ class CreateControllerCommand( GenericCommand ):
         self._validmap = {
             pyvbcc.KEY_VM_NAME: { "match": ["^[a-zA-Z0-9\-\._/ ]+$"], "mandatory":True },
             pyvbcc.KEY_CONTROLLER_TYPE: { "match": ["ide","sata","scsi","floppy","sas","usb","pcie"], "mandatory":True },
-            pyvbcc.KEY_CONTROLLER_CHIPSET: { "match": [ "LSILogic","LSILogicSAS","BusLogic","IntelAHCI","PIIX3","PIIX4","ICH6","I82078","USB","NVMe"
- ], "mandatory":True },
+            pyvbcc.KEY_CONTROLLER_CHIPSET: { "match": [ "LSILogic","LSILogicSAS","BusLogic","IntelAHCI","PIIX3","PIIX4","ICH6","I82078","USB","NVMe"], "mandatory":True },
             pyvbcc.KEY_CONTROLLER_NAME: { "match": [ "^[a-zA-Z0-9\-\._/ ]+$" ], "mandatory":True },
             pyvbcc.KEY_CONTROLLER_PCOUNT: { "match": ["^[0-9]+$"] },
             pyvbcc.KEY_CONTROLLER_BOOTABLE: { "match": ["on","off"] }
@@ -131,7 +130,7 @@ class AttachDiskCommand( GenericCommand ):
             pyvbcc.KEY_DISKS_COMMENT: {"match": ["^.*$"] }
         }
 
-        opt["strict"] = False
+        opt["strict"] = False   
         pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
 
         if pyvbcc.KEY_DISKS_PORT not in self._cfg: self._cfg[ pyvbcc.KEY_DISKS_PORT ] = "0"
