@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+
+import os, sys, re
+sys.path.append( ".")
+sys.path.append( ".." )
+
+import getopt
+import traceback
+
+from pathlib import Path
+from pprint import pprint
+
+import pyvbcc
+import pyvbcc.config
+import pyvbcc.cli
+
+
+##########################################################
+## Defaults
+##########################################################
+CONFIG_FILE="etc/pyvbcc.json"
+
+##########################################################
+## Menu
+##########################################################
+SUPPORTED_MODES= {
+    "help" : {"description": "This help"},
+    "start" : {"description": "Start Env. from file"},
+    "stop" : {"description": "Stop Env. from file"},
+    "create" : {"description": "Create full env or parts."},
+    "destroy" : {"description": "Destroy full env or parts."},
+    "fput" : {"description": "Put a file into a guest"},
+    "fget" : {"description": "Stop VM group"},
+    "vmmount" : {"description":"Mount external path into VM"}
+    "exec" : {"description": "Run command in VM"},
+    "attach": {"description":"Attach media to VM"},
+    "detach": {"description":"Deteach media from VM"}
+    "info": {"description":"Env information"}
+}
+
+
+
+def print_help( script, mode=None ):
+    sps = re.split("\/", script )
+    print("# Help %s " % ( sps[-1] ) )
+
+    if not mode:
+        for m in SUPPORTED_MODES:
+            print("\t%s \t %s" % ( m, SUPPORTED_MODES[m]["description"] ) )
+
+
+
+def print_exception( e ):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    print("****** print_tb:")
+    traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+    print("****** print_exception:")
+    # exc_type below is ignored on 3.5 and later
+    traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                limit=2, file=sys.stdout)
+    print("****** print_exc:")
+    traceback.print_exc(limit=2, file=sys.stdout)
+    print("****** format_exc, first and last line:")
+    formatted_lines = traceback.format_exc().splitlines()
+    print(formatted_lines[0])
+    print(formatted_lines[-1])
+    print("****** format_exception:")
+    # exc_type below is ignored on 3.5 and later
+    print(repr(traceback.format_exception(exc_type, exc_value,
+                                            exc_traceback)))
+    print("****** extract_tb:")
+    print(repr(traceback.extract_tb(exc_traceback)))
+    print("****** format_tb:")
+    print(repr(traceback.format_tb(exc_traceback)))
+    print("****** tb_lineno:", exc_traceback.tb_lineno)
+
+
+if __name__ == "__main__":
+    opt = dict()
+    
+    if len( sys.argv ) < 2:
+        print_help( sys.argv[0] )
+        sys.exit(1)
+
+    if sys.argv[1] in SUPPORTED_MODES:
+        opt[ pyvbcc.KEY_SYSTEM_MODE ] = sys.argv[1]
+    else:
+        print_help( sys.argv[0] )
+        sys.exit(3)
+
+    main_config = pyvbcc.config.Configuration( CONFIG_FILE )
