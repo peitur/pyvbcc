@@ -17,7 +17,7 @@ import pyvbcc.command
 ###########################################################################################################################
 ## Basic controller commands
 ###########################################################################################################################
-class CreateControllerCommand( GenericCommand ):
+class CreateControllerCommand( pyvbcc.command.GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
         self._cfg = cfg
@@ -61,7 +61,7 @@ class CreateControllerCommand( GenericCommand ):
 ###########################################################################################################################
 ## Basic dock management commands
 ###########################################################################################################################
-class CreateDiskCommand( GenericCommand ):
+class CreateDiskCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         self._cfg = cfg
         self._validmap = {
@@ -89,7 +89,7 @@ class CreateDiskCommand( GenericCommand ):
 
 
 
-class CloseDiskCommand( GenericCommand ):
+class CloseDiskCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
 
         self._cfg = cfg
@@ -115,7 +115,7 @@ class CloseDiskCommand( GenericCommand ):
         ], **opt )
 
 
-class AttachDiskCommand( GenericCommand ):
+class AttachDiskCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
 
         self._cfg = cfg

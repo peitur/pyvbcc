@@ -32,7 +32,7 @@ class ListVmsCommand( pyvbcc.command.GenericCommand ):
 
 class InfoVmCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, vm, **opt ):
-        super().__init__( [ "showvminfo", "--machinereadable",vm ], **opt )
+        super().__init__( [ "showvminfo", "--machinereadable", "--details",vm ], **opt )
 
     def run( self ):
         data = dict()
@@ -44,6 +44,35 @@ class InfoVmCommand( pyvbcc.command.GenericCommand ):
             data[ nldata[0] ] = nldata[1]
         return data
 
+
+class ListOsTypesCommand( pyvbcc.command.GenericCommand ):
+    def __init__( self, **opt ):
+        super().__init__( [ "list", "ostypes", "--sorted"], **opt )
+
+    def run( self ):
+        data = dict()
+        res = super().run().result()
+        item = dict()
+
+        for line in res:
+            line = re.compile( "\"" ).sub(  "", line )
+            nldata = re.split(r":", line )
+
+            if len( nldata ) > 1:
+                key = nldata[0].lstrip().rstrip().lower()
+                val = nldata[1].lstrip().rstrip()
+
+                key = re.sub( "\s+", "_", key )
+
+                if re.match( "id", key ) and len( item ) > 0:
+                    data[ item[ 'id' ] ] = item
+                    item = dict()
+                item[ key ] = val
+
+            if len( line ) == 0 and len( item ) > 0:
+                data[ item['id'] ] = item
+
+        return data
 
 ###########################################################################################################################
 ## VM basic management
@@ -207,10 +236,11 @@ class ModifyVmBootCommand( pyvbcc.command.GenericCommand ):
 
 
 
+
 ###########################################################################################################################
 ## Power manage
 ###########################################################################################################################
-class ModifyVmPowerOffCommand( GenericCommand ):
+class ModifyVmPowerOffCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg:
             raise AttributeError("Missing vm name")
@@ -227,3 +257,16 @@ class ModifyVmPowerOffCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
+class ModifyVmStartCommand( pyvbcc.command.GenericCommand ):
+    def __init__( self, cfg = {}, **opt ):
+        if pyvbcc.KEY_VM_NAME not in cfg:
+            raise AttributeError("Missing vm name")
+
+        self._type = "headless"
+        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
+        if pyvbcc.KEY_VM_STYPE in cfg: self._type = cfg[ pyvbcc.KEY_VM_STYPE ]
+        if pyvbcc.KEY_VM_SENV in cfg: self._startenv = cfg[ pyvbcc.KEY_VM_SENV ]
+
+        params = [ "startvm", self._vm, "--type", self._type ]
+
+        super().__init__( params, **opt )

@@ -17,7 +17,7 @@ import pyvbcc.command
 ###########################################################################################################################
 ## VM NIC modify
 ###########################################################################################################################
-class ModifyVmNicCommand( GenericCommand ):
+class ModifyVmNicCommand( pyvbcc.command.GenericCommand ):
 
     def __init__( self, cfg = {}, **opt ):
 
@@ -73,7 +73,7 @@ class ModifyVmNicCommand( GenericCommand ):
 ###########################################################################################################################
 ## NAT netwrking
 ###########################################################################################################################
-class CreateNatNetworkCommand( GenericCommand ):
+class CreateNatNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_NETWORK_NAME not in cfg or pyvbcc.KEY_NETWORK_ADDR not in cfg or pyvbcc.KEY_NETWORK_CIDR not in cfg:
             raise AttributeError("Missing nat network name or network address or cidr")
@@ -115,7 +115,7 @@ class CreateNatNetworkCommand( GenericCommand ):
         super().__init__( params, **opt )
 
 
-class ModifyNatNetworkCommand( GenericCommand ):
+class ModifyNatNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_NETWORK_NAME not in cfg:
             raise AttributeError("Missing nat network name")
@@ -153,7 +153,7 @@ class ModifyNatNetworkCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
-class DeleteNatNetworkCommand( GenericCommand ):
+class DeleteNatNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_NETWORK_NAME not in cfg:
             raise AttributeError("Missing nat network name")
@@ -164,7 +164,7 @@ class DeleteNatNetworkCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
-class StartNatNetworkCommand( GenericCommand ):
+class StartNatNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_NETWORK_NAME not in cfg:
             raise AttributeError("Missing nat network name")
@@ -175,7 +175,7 @@ class StartNatNetworkCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
-class StopNatNetworkCommand( GenericCommand ):
+class StopNatNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_NETWORK_NAME not in cfg:
             raise AttributeError("Missing nat network name")
@@ -192,7 +192,7 @@ class StopNatNetworkCommand( GenericCommand ):
 ###########################################################################################################################
 ## HostOnly netwrking
 ###########################################################################################################################
-class CreateHostOnlyNetworkCommand( GenericCommand ):
+class CreateHostOnlyNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
             raise AttributeError("Missing vm name and NIC id")
@@ -203,7 +203,7 @@ class CreateHostOnlyNetworkCommand( GenericCommand ):
 
         super().__init__( params, **opt )
 
-class DeleteHostOnlyNetworkCommand( GenericCommand ):
+class DeleteHostOnlyNetworkCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
             raise AttributeError("Missing vm name and NIC id")
@@ -219,7 +219,7 @@ class DeleteHostOnlyNetworkCommand( GenericCommand ):
 ###########################################################################################################################
 ## IntNet netwrking
 ###########################################################################################################################
-class ModifyVmIntNetNicCommand( GenericCommand ):
+class ModifyVmIntNetNicCommand( pyvbcc.command.GenericCommand ):
     def __init__( self, cfg = {}, **opt ):
         if pyvbcc.KEY_VM_NAME not in cfg or pyvbcc.KEY_NIC_ID not in cfg:
             raise AttributeError("Missing vm name and NIC id")
@@ -233,18 +233,41 @@ class ModifyVmIntNetNicCommand( GenericCommand ):
 
 
 ###########################################################################################################################
-## Power manage
+## Listing stuff commands
 ###########################################################################################################################
-class ModifyVmStartCommand( GenericCommand ):
-    def __init__( self, cfg = {}, **opt ):
-        if pyvbcc.KEY_VM_NAME not in cfg:
-            raise AttributeError("Missing vm name")
 
-        self._type = "headless"
-        self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
-        if pyvbcc.KEY_VM_STYPE in cfg: self._type = cfg[ pyvbcc.KEY_VM_STYPE ]
-        if pyvbcc.KEY_VM_SENV in cfg: self._startenv = cfg[ pyvbcc.KEY_VM_SENV ]
+class ListNetworkCommand( pyvbcc.command.GenericCommand ):
+    def __init__( self, mode, net = None, **opt ):
+        super().__init__( [ "list", mode ], **opt )
+        self._net = net
+        self._mode = mode
 
-        params = [ "startvm", self._vm, "--type", self._type ]
+    def run( self ):
+        data = dict()
+        res = super().run().result()
+        item = dict()
+        for line in res:
+            line = re.compile( "\"" ).sub(  "", line )
+            nldata = re.split(r":", line )
 
-        super().__init__( params, **opt )
+            if len( nldata ) > 1:
+                key = nldata[0].lstrip().rstrip().lower()
+                val = nldata[1].lstrip().rstrip()
+
+                #for some reason natnet names are called "NetworkName"
+                if key == "networkname" :
+                    key = "name"
+
+                if re.match( "name", key ) and len( item ) > 0:
+                    data[ item[ 'name' ] ] = item
+                    item = dict()
+                item[ key ] = val
+
+            if len( line ) == 0 and len( item ) > 0:
+                data[ item['name'] ] = item
+
+        if self._net == "all": return data
+        elif self._net in data: return data[ self._net ]
+
+        return []
+

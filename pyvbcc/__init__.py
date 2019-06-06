@@ -67,6 +67,8 @@ KEY_DISKS_SIZE="disk.size"
 KEY_DISKS_DELETE="disk.delete"
 
 ##
+KEY_NETWORK_TYPE="network.type"
+
 KEY_NETWORK_NAME="network.name"
 KEY_NETWORK_ADDR="network.address"
 KEY_NETWORK_CIDR="network.cidr"

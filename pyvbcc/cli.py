@@ -26,10 +26,11 @@ class HelpCommandLine( pyvbcc.command.CommonCommandLine ):
 
 class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
     def __init__(self, argv, **opt ):
-        super().__init__( argv, ["v:","n:","d","g:"], ["debug","vm=","network=","dhcp=","group=","vm-disk="], **opt )
+        super().__init__( argv, ["v:","n:","d","g:", "o:"], ["debug","vm=","network=","dhcp=","group=","vm-disk=", "ostype="], **opt )
 
         self._validmap = {
             pyvbcc.KEY_VM_NAME :{ "match":["^[a-zA-Z0-9\-\._]+$"] },
+            pyvbcc.KEY_VM_OSTYPE :{ "match":["^[a-zA-Z0-9\-\._]+$"] },
             pyvbcc.KEY_NETWORK_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
             pyvbcc.KEY_DHCP_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
             pyvbcc.KEY_DISKS_NAME : { "match":["^[a-zA-Z0-9\-\._]+$"] },
@@ -55,6 +56,8 @@ class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
                 self._opt[ pyvbcc.KEY_DHCP_NAME ] = a
             elif o in ("-g", "--group"):
                 self._opt[ pyvbcc.KEY_GROUP_NAME ] = a
+            elif o in ("-o", "--ostype"):
+                self._opt[ pyvbcc.KEY_VM_OSTYPE ] = a
             elif o in ("--vm-disk"):
                 self._opt[ pyvbcc.KEY_DISKS_NAME ] = a
 
@@ -68,8 +71,11 @@ class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
         if pyvbcc.KEY_VM_NAME in self._opt:
             return pyvbcc.vm.GetVmInfo( self._opt ) 
 
+        if pyvbcc.KEY_VM_OSTYPE in self._opt:
+            return pyvbcc.vm.GetOsTypesInfo( self._opt ) 
+
         if pyvbcc.KEY_NETWORK_NAME in self._opt:
-            return pyvbcc.info.GetNetworkInfo( self._opt )
+            return pyvbcc.net.GetNetworkInfo( self._opt )
             
         if pyvbcc.KEY_DISKS_NAME in self._opt:
             return pyvbcc.info.GetDiskInfo( self._opt[ pyvbcc.KEY_DISKS_NAME ] ).run()
