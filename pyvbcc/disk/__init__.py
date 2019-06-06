@@ -15,3 +15,5 @@ import pyvbcc.command
 import pyvbcc.disk.commands
 
 
+def GetDiskInfo( opt ):
+    return pyvbcc.disk.commands.ListDiskCommand( opt[ pyvbcc.KEY_DISKS_NAME ] ).run()

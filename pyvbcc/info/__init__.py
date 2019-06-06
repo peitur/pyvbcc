@@ -36,7 +36,10 @@ def GetNetworkInfo( opt ):
     return allnets
 
 def GetSystemInfo( opt ):
-    return pyvbcc.info.commands.ListSystemPropertiesCommand( opt ).run()
+    res = dict()
+    res['sysinfo'] = pyvbcc.info.commands.ListSystemPropertiesCommand( opt ).run()
+    res['hostinfo'] = pyvbcc.info.commands.ListHostInfoCommand( opt ).run()
+    return res
 
 if __name__ == "__main__":
     pass

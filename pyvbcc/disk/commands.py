@@ -130,7 +130,7 @@ class AttachDiskCommand( pyvbcc.command.GenericCommand ):
             pyvbcc.KEY_DISKS_COMMENT: {"match": ["^.*$"] }
         }
 
-        opt["strict"] = False   
+        opt["strict"] = False
         pyvbcc.validate.Validator( self._validmap, **opt ).validate( self._cfg )
 
         if pyvbcc.KEY_DISKS_PORT not in self._cfg: self._cfg[ pyvbcc.KEY_DISKS_PORT ] = "0"
@@ -150,3 +150,42 @@ class AttachDiskCommand( pyvbcc.command.GenericCommand ):
         if pyvbcc.KEY_DISKS_COMMENT in self._cfg: params += list( [ "--comment", self._cfg[ pyvbcc.KEY_DISKS_COMMENT ] ] )
 
         super().__init__( params, **opt )
+
+
+###########################################################################################################################
+## Get info
+###########################################################################################################################
+class ListDiskCommand( pyvbcc.command.GenericCommand ):
+    def __init__( self, vm = None, **opt ):
+        super().__init__( [ "list", "hdds", "--long" ], **opt )
+        self._vm = vm
+
+    def run( self ):
+        data = dict()
+        res = super().run().result()
+        item = dict()
+        for line in res:
+            line = re.compile( "\"" ).sub(  "", line )
+            nldata = re.split(r":", line )
+
+            if len( nldata ) > 1:
+                key = re.sub( r"\s+", "", nldata[0].lstrip().rstrip().lower() )
+                val = nldata[1].lstrip().rstrip()
+
+                if key == "inusebyvms":
+                    linex = re.sub( r"\s+", "", line )
+                    m = re.compile("\S+:(\S+)\(UUID:(\S+)\)").match( linex )
+                    val = {"name": m.group(1), "uuid":m.group(2)}
+
+                if re.match( "uuid", key ) and len( item ) > 0:
+                    data[ item[ 'uuid' ] ] = item
+                    item = dict()
+                item[ key ] = val
+
+            if len( line ) == 0 and len( item ) > 0:
+                data[ item['uuid'] ] = item
+
+        if self._vm == "all":
+            return data
+
+        return [ data[i] for i in data if 'inusebyvms' in data[i] and data[i]['inusebyvms']['name'] == self._vm ]

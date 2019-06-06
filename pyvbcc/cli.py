@@ -46,7 +46,7 @@ class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
         for o, a in self._opts:
             if a in ("-h", "--help"):
                 self._opt[ pyvbcc.KEY_SYSTEM_HELP ] = True
-            elif o in ("-d", "--debug"):
+            elif o in ("--debug"):
                 self._opt[ pyvbcc.KEY_SYSTEM_DEBUG ] = True
             elif o in ("-v", "--vm"):
                 self._opt[ pyvbcc.KEY_VM_NAME ] = a
@@ -69,16 +69,16 @@ class InfoCommandLine( pyvbcc.command.CommonCommandLine ):
 
     def action( self ):
         if pyvbcc.KEY_VM_NAME in self._opt:
-            return pyvbcc.vm.GetVmInfo( self._opt ) 
+            return pyvbcc.vm.GetVmInfo( self._opt )
 
         if pyvbcc.KEY_VM_OSTYPE in self._opt:
-            return pyvbcc.vm.GetOsTypesInfo( self._opt ) 
+            return pyvbcc.vm.GetOsTypesInfo( self._opt )
 
         if pyvbcc.KEY_NETWORK_NAME in self._opt:
             return pyvbcc.net.GetNetworkInfo( self._opt )
-            
+
         if pyvbcc.KEY_DISKS_NAME in self._opt:
-            return pyvbcc.info.GetDiskInfo( self._opt[ pyvbcc.KEY_DISKS_NAME ] ).run()
+            return pyvbcc.disk.GetDiskInfo( self._opt )
 
         if pyvbcc.KEY_GROUP_NAME in self._opt:
             return pyvbcc.info.GetGroupInfo( self._opt )
