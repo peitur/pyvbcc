@@ -27,31 +27,18 @@ class ModifyVmNicCommand( pyvbcc.command.GenericCommand ):
         self._vm = cfg[ pyvbcc.KEY_VM_NAME ]
         self._nic_id = cfg[ pyvbcc.KEY_NIC_ID ]
 
-        self._nic_net = None
-        self._nic_mac = None
-        self._nic_connected = None
-        self._nic_type = None
-        self._nic_trace = None
-        self._nic_trace_file = None
-        self._nic_property = None
-        self._nic_speed = None
-        self._nic_bootprio = None
-        self._nic_promisc = None
-        self._nic_bandwidth_group = None
-        self._nic_genericdrv = None
-
-        if pyvbcc.KEY_NIC_NET in cfg: self._nic_net = cfg[ pyvbcc.KEY_NIC_NET ]
-        if pyvbcc.KEY_NIC_MAC in cfg: self._nic_mac = cfg[ pyvbcc.KEY_NIC_MAC ]
-        if pyvbcc.KEY_NIC_CONNECTED in cfg: self._nic_connected = cfg[ pyvbcc.KEY_NIC_CONNECTED ]
-        if pyvbcc.KEY_NIC_TYPE in cfg: self._nic_type = cfg[ pyvbcc.KEY_NIC_TYPE ]
-        if pyvbcc.KEY_NIC_TRACE in cfg: self._nic_trace = cfg[ pyvbcc.KEY_NIC_TRACE ]
-        if pyvbcc.KEY_NIC_TRACEFILE in cfg: self._nic_trace_file = cfg[ pyvbcc.KEY_NIC_TRACEFILE ]
-        if pyvbcc.KEY_NIC_PROPERTY in cfg: self._nic_property = cfg[ pyvbcc.KEY_NIC_PROPERTY ]
-        if pyvbcc.KEY_NIC_SPEED in cfg: self._nic_speed = cfg[ pyvbcc.KEY_NIC_SPEED ]
-        if pyvbcc.KEY_NIC_BOOTPRIO in cfg: self._nic_bootprio = cfg[ pyvbcc.KEY_NIC_BOOTPRIO ]
-        if pyvbcc.KEY_NIC_PROMISC in cfg: self._nic_promisc = cfg[ pyvbcc.KEY_NIC_PROMISC ]
-        if pyvbcc.KEY_NIC_BANDWIDTH_GROUP in cfg: self._nic_bandwidth_group = cfg[ pyvbcc.KEY_NIC_BANDWIDTH_GROUP ]
-        if pyvbcc.KEY_NIC_GENERICDRV in cfg: self._nic_genericdrv = cfg[ pyvbcc.KEY_NIC_GENERICDRV ]
+        if pyvbcc.KEY_NIC_NET in cfg: self._nic_net = cfg.get( pyvbcc.KEY_NIC_NET, None ]
+        if pyvbcc.KEY_NIC_MAC in cfg: self._nic_mac = cfg.get( pyvbcc.KEY_NIC_MAC, None )
+        if pyvbcc.KEY_NIC_CONNECTED in cfg: self._nic_connected = cfg.get( pyvbcc.KEY_NIC_CONNECTED, None )
+        if pyvbcc.KEY_NIC_TYPE in cfg: self._nic_type = cfg.get( pyvbcc.KEY_NIC_TYPE, None )
+        if pyvbcc.KEY_NIC_TRACE in cfg: self._nic_trace = cfg.get( pyvbcc.KEY_NIC_TRACE, None )
+        if pyvbcc.KEY_NIC_TRACEFILE in cfg: self._nic_trace_file = cfg.get( pyvbcc.KEY_NIC_TRACEFILE, None )
+        if pyvbcc.KEY_NIC_PROPERTY in cfg: self._nic_property = cfg.get( pyvbcc.KEY_NIC_PROPERTY, None )
+        if pyvbcc.KEY_NIC_SPEED in cfg: self._nic_speed = cfg.get( pyvbcc.KEY_NIC_SPEED, None )
+        if pyvbcc.KEY_NIC_BOOTPRIO in cfg: self._nic_bootprio = cfg.get( pyvbcc.KEY_NIC_BOOTPRIO, None )
+        if pyvbcc.KEY_NIC_PROMISC in cfg: self._nic_promisc = cfg.get( pyvbcc.KEY_NIC_PROMISC, None )
+        if pyvbcc.KEY_NIC_BANDWIDTH_GROUP in cfg: self._nic_bandwidth_group = cfg.get( pyvbcc.KEY_NIC_BANDWIDTH_GROUP, None )
+        if pyvbcc.KEY_NIC_GENERICDRV in cfg: self._nic_genericdrv = cfg.get( pyvbcc.KEY_NIC_GENERICDRV, None )
 
         params = [ "modifyvm", self._vm ]
         if self._nic_net: params += list( [ "--nic%s" % (self._nic_id), self._nic_net ] )
@@ -78,18 +65,13 @@ class CreateNatNetworkCommand( pyvbcc.command.GenericCommand ):
         if pyvbcc.KEY_NETWORK_NAME not in cfg or pyvbcc.KEY_NETWORK_ADDR not in cfg or pyvbcc.KEY_NETWORK_CIDR not in cfg:
             raise AttributeError("Missing nat network name or network address or cidr")
 
-        self._enabled = True
-        self._dhcp = True
-        self._ipv6 = False
-        self._cidr = "24"
-
         self._network = cfg[ pyvbcc.KEY_NETWORK_ADDR ]
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
 
-        if pyvbcc.KEY_NETWORK_CIDR in cfg: self._cidr = cfg[ pyvbcc.KEY_NETWORK_CIDR ]
-        if pyvbcc.KEY_NETWORK_ENABLED in cfg: self._enabled = cfg[ pyvbcc.KEY_NETWORK_ENABLED ]
-        if pyvbcc.KEY_NETWORK_IPV6 in cfg: self._ipv6 = cfg[ pyvbcc.KEY_NETWORK_IPV6 ]
-        if pyvbcc.KEY_NETWORK_DHCP in cfg: self._dhcp = cfg[ pyvbcc.KEY_NETWORK_DHCP ]
+        if pyvbcc.KEY_NETWORK_CIDR in cfg: self._cidr = cfg.get( pyvbcc.KEY_NETWORK_CIDR, "24")
+        if pyvbcc.KEY_NETWORK_ENABLED in cfg: self._enabled = cfg.get( pyvbcc.KEY_NETWORK_ENABLED, True )
+        if pyvbcc.KEY_NETWORK_IPV6 in cfg: self._ipv6 = cfg.get( pyvbcc.KEY_NETWORK_IPV6, False )
+        if pyvbcc.KEY_NETWORK_DHCP in cfg: self._dhcp = cfg.get( pyvbcc.KEY_NETWORK_DHCP, True )
 
         params = [ "natnetwork", "add",
             "--netname", self._nat_name,
@@ -121,7 +103,6 @@ class ModifyNatNetworkCommand( pyvbcc.command.GenericCommand ):
             raise AttributeError("Missing nat network name")
 
         self._nat_name = cfg[ pyvbcc.KEY_NETWORK_NAME ]
-
 
         self._enabled = None
         self._dhcp = None

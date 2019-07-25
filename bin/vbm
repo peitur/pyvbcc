@@ -6,13 +6,14 @@ sys.path.append( ".." )
 
 import getopt
 import traceback
+import pathlib
 
-from pathlib import Path
 from pprint import pprint
 
 import pyvbcc
 import pyvbcc.config
 import pyvbcc.cli
+import pyvbcc.vbm
 
 
 ##########################################################
@@ -31,10 +32,11 @@ SUPPORTED_MODES= {
     "destroy" : {"description": "Destroy full env or parts."},
     "fput" : {"description": "Put a file into a guest"},
     "fget" : {"description": "Stop VM group"},
-    "vmmount" : {"description":"Mount external path into VM"}
+    "vmmount" : {"description":"Mount external path into VM"},
     "exec" : {"description": "Run command in VM"},
     "attach": {"description":"Attach media to VM"},
-    "detach": {"description":"Deteach media from VM"}
+    "detach": {"description":"Deteach media from VM"},
+    "validate": {"description": "Verify virtual environment"},
     "info": {"description":"Env information"}
 }
 
@@ -66,8 +68,7 @@ def print_exception( e ):
     print(formatted_lines[-1])
     print("****** format_exception:")
     # exc_type below is ignored on 3.5 and later
-    print(repr(traceback.format_exception(exc_type, exc_value,
-                                            exc_traceback)))
+    print(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
     print("****** extract_tb:")
     print(repr(traceback.extract_tb(exc_traceback)))
     print("****** format_tb:")
@@ -78,7 +79,7 @@ def print_exception( e ):
 if __name__ == "__main__":
     opt = dict()
     
-    if len( sys.argv ) < 2:
+    if len( sys.argv ) < 3:
         print_help( sys.argv[0] )
         sys.exit(1)
 
@@ -88,4 +89,13 @@ if __name__ == "__main__":
         print_help( sys.argv[0] )
         sys.exit(3)
 
+
+    if sys.argv[2] and pathlib.Path( sys.argv[2] ).exists():
+        opt[ pyvbcc.KEY_SYSTEM_ENVFILE ] = sys.argv[2]
+    else:
+        print_help( sys.argv[0] )
+        sys.exit(3)
+
+
     main_config = pyvbcc.config.Configuration( CONFIG_FILE )
+    vbo = pyvbcc.vbm.VbManage( main_config, **opt )

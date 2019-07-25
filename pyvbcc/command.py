@@ -14,6 +14,14 @@ class GenericCommandResult( object ):
         self._cmd = cmd
         self._result = result
         self._exitcode = exitcode
+        self._debug = False
+        self._test = False
+
+        if "debug" in opt and opt['debug'] in (True, False):
+            self._debug = opt["debug"]
+
+        if "test" in opt and opt['test'] in (True, False):
+            self._test = opt["test"]
 
     def exitcode( self ):
         return self._exitcode
@@ -29,8 +37,14 @@ class GenericCommand( object ):
     def __init__(self, cmd, **opt ):
         self._cmd = cmd
         self._debug = False
+        self._test = False
         self._command = "VBoxManage"
 
+        if "debug" in opt and opt['debug'] in (True, False):
+            self._debug = opt["debug"]
+
+        if "test" in opt and opt['test'] in (True, False):
+            self._test = opt["test"]
 
         if pyvbcc.KEY_SYSTEM_DEBUG in opt and opt[ pyvbcc.KEY_SYSTEM_DEBUG ] in (True,False):
             self._debug = opt[ pyvbcc.KEY_SYSTEM_DEBUG ]
@@ -50,16 +64,22 @@ class GenericCommand( object ):
 
         if self._debug: print( " ".join( cmd ) )
 
+        if self._test:
+            return GenericCommandResult( cmd, result, 999, **opt )
+
         prc = subprocess.Popen( cmd, universal_newlines=True, stdout=subprocess.PIPE )
         for line in prc.stdout.readlines():
             result.append( line.lstrip().rstrip() )
-        
+
         return GenericCommandResult( cmd, result, prc.returncode, **opt )
+
+
 
 
 class CommonCommandLine( object ):
     def __init__( self, argv, shrt=[], lng=[], **opt ):
         self._debug = False
+        self._test = False
         self._argv = argv
         self._short = ["hDc:"]+shrt
         self._long = ["help","debug", "config="]+lng
@@ -70,6 +90,9 @@ class CommonCommandLine( object ):
 
         if 'debug' in opt and opt['debug'] in (True, False):
             self._debug = opt['debug']
+
+        if "test" in opt and opt['test'] in (True, False):
+            self._test = opt["test"]
 
         try:
             self._opts, self._args = getopt.getopt( self._argv[1:], "".join( self._short ), self._long )
@@ -85,6 +108,7 @@ class CommonCommandLine( object ):
 
     def action( self ): pass
 
+    def print_help( self ): pass
 
 if __name__ == "__main__":
     pass

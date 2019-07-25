@@ -1,7 +1,9 @@
 
 ##
 KEY_SYSTEM_MODE="system.mode"
+KEY_SYSTEM_ENVFILE="system.envfile"
 KEY_SYSTEM_DEBUG="system.debug"
+KEY_SYSTEM_TEST="system.test"
 KEY_SYSTEM_CONFIG="system.config"
 KEY_SYSTEM_HELP="system.help"
 KEY_SYSTEM_COMMAND="system.command"
